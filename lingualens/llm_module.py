@@ -1,7 +1,7 @@
 """
 llm_module.py — LLM interaction for LinguaLens
 
-Uses Google Gemini (gemini-2.0-flash) to:
+Uses Google Gemini (gemini-2.5-flash) to:
 - Simplify complex text into plain language
 - Generate key points
 - Translate explanations into the target language
@@ -25,45 +25,48 @@ def _get_model():
     if _model is None:
         _api_key = load_config()
         genai.configure(api_key=_api_key)
-        _model = genai.GenerativeModel("gemini-2.0-flash")
+        _model = genai.GenerativeModel("gemini-2.5-flash")
     return _model
 
 
-def _build_prompt(text: str, target_language: str) -> str:
+def _build_prompt(text: str, target_language: str, difficulty: str) -> str:
     """
     Build the prompt template for text simplification and translation.
 
     Args:
         text: The OCR-extracted text to process.
         target_language: The language for translation output.
+        difficulty: The target audience reading level (e.g. Child, Student, Professional).
 
     Returns:
         Formatted prompt string.
     """
-    prompt = f"""You are an expert at making complex information accessible to everyone.
+    prompt = f"""You are an expert at making complex information accessible.
 
 Analyze the following text that was extracted from an image (it may be a medicine label, 
 government document, signboard, instruction manual, research paper, or similar).
 
 Your task:
-1. **Simple Explanation**: Rewrite the text in simple, everyday language that a non-expert 
-   can easily understand. Avoid jargon and technical terms. If the text contains medical, 
-   legal, or technical content, explain what it means in practical terms.
-
-2. **Key Points**: List the 3-5 most important takeaways as bullet points.
-
-3. **Translation**: Translate your simple explanation into {target_language}. 
-   Make sure the translation is natural and easy to read, not a literal word-for-word translation.
+1. **Detected Language**: Identify the primary language(s) of the original text.
+2. **AI Simplified Explanation**: Rewrite the text tailored for a {difficulty}. Avoid jargon and technical terms. If the text contains medical, legal, or technical content, explain what it means in practical terms for a {difficulty}.
+3. **Key Points**: List 3-5 important takeaways using this format:
+   - What this document is: [description]
+   - Information required/present: [details]
+   - Actions to take: [actions]
+4. **Translation**: Translate your simplified explanation into {target_language}. Make sure the translation is natural and easy to read.
 
 Format your response EXACTLY like this (use these exact headers):
 
-## Simple Explanation
-[Your simple explanation here]
+## Detected Language
+[Language name]
+
+## AI Simplified Explanation
+[Your simple explanation tailored for a {difficulty}]
 
 ## Key Points
-- [Point 1]
-- [Point 2]
-- [Point 3]
+- What this document is: [description]
+- Information present: [details]
+- Actions to take: [actions]
 
 ## Translation ({target_language})
 [Your translated explanation here]
@@ -78,16 +81,18 @@ Text to analyze:
     return prompt
 
 
-def simplify_and_translate(text: str, target_language: str = "Hindi") -> dict:
+def simplify_and_translate(text: str, target_language: str = "Hindi", difficulty: str = "Student") -> dict:
     """
     Send extracted text to Gemini for simplification and translation.
 
     Args:
         text: The OCR-extracted text to process.
         target_language: Target language for translation (English, Hindi, or Tamil).
+        difficulty: Target reading level.
 
     Returns:
         Dictionary with keys:
+        - 'detected_language': Guessed language of original text
         - 'explanation': Simple explanation of the text
         - 'key_points': Key points as a string
         - 'translation': Translated explanation
@@ -95,6 +100,7 @@ def simplify_and_translate(text: str, target_language: str = "Hindi") -> dict:
     """
     if not text or not text.strip():
         return {
+            "detected_language": "Unknown",
             "explanation": "No text was provided to analyze.",
             "key_points": "",
             "translation": "",
@@ -102,7 +108,7 @@ def simplify_and_translate(text: str, target_language: str = "Hindi") -> dict:
         }
 
     model = _get_model()
-    prompt = _build_prompt(text, target_language)
+    prompt = _build_prompt(text, target_language, difficulty)
 
     try:
         response = model.generate_content(prompt)
@@ -116,6 +122,7 @@ def simplify_and_translate(text: str, target_language: str = "Hindi") -> dict:
     except Exception as e:
         error_msg = f"Error communicating with Gemini API: {str(e)}"
         return {
+            "detected_language": "Unknown",
             "explanation": error_msg,
             "key_points": "",
             "translation": "",
@@ -124,49 +131,24 @@ def simplify_and_translate(text: str, target_language: str = "Hindi") -> dict:
 
 
 def _parse_response(response_text: str, target_language: str) -> dict:
-    """
-    Parse the LLM response into structured sections.
+    import re
+    
+    # Use regex to robustly parse sections regardless of spacing
+    detected_lang_match = re.search(r'## Detected Language\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    explanation_match = re.search(r'## (?:AI )?Simplified Explanation|## Simple Explanation\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    key_points_match = re.search(r'## Key Points\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    translation_match = re.search(r'## Translation.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
 
-    Looks for the markdown headers:
-    - ## Simple Explanation
-    - ## Key Points
-    - ## Translation
+    explanation = explanation_match.group(1).strip() if explanation_match else ""
+    key_points = key_points_match.group(1).strip() if key_points_match else ""
+    translation = translation_match.group(1).strip() if translation_match else ""
+    detected_lang = detected_lang_match.group(1).strip() if detected_lang_match else "Unknown"
 
-    Args:
-        response_text: Raw text response from the LLM.
-        target_language: The target language (used to identify translation section).
-
-    Returns:
-        Dictionary with 'explanation', 'key_points', and 'translation' keys.
-    """
-    explanation = ""
-    key_points = ""
-    translation = ""
-
-    # Split by ## headers and extract sections
-    sections = response_text.split("## ")
-
-    for section in sections:
-        section_lower = section.lower().strip()
-
-        if section_lower.startswith("simple explanation"):
-            # Everything after the header line
-            lines = section.split("\n", 1)
-            explanation = lines[1].strip() if len(lines) > 1 else ""
-
-        elif section_lower.startswith("key points"):
-            lines = section.split("\n", 1)
-            key_points = lines[1].strip() if len(lines) > 1 else ""
-
-        elif section_lower.startswith("translation"):
-            lines = section.split("\n", 1)
-            translation = lines[1].strip() if len(lines) > 1 else ""
-
-    # Fallback: if parsing failed, return the full response as explanation
     if not explanation and not key_points and not translation:
         explanation = response_text
         
     return {
+        "detected_language": detected_lang,
         "explanation": explanation,
         "key_points": key_points,
         "translation": translation,

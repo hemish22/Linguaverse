@@ -9,6 +9,7 @@ Provides:
 
 import os
 import io
+import re
 from dotenv import load_dotenv
 from gtts import gTTS
 from PIL import Image
@@ -20,7 +21,7 @@ def load_config():
     Load environment variables from .env file.
     Returns the Gemini API key or raises an error if not found.
     """
-    load_dotenv()
+    load_dotenv(override=True)
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError(
@@ -38,6 +39,22 @@ LANGUAGE_MAP = {
 }
 
 
+def clean_for_tts(text: str) -> str:
+    """
+    Remove markdown formatting like bullets and bolding so the TTS 
+    doesn't read out "dash" or "asterisk".
+    """
+    if not text:
+        return ""
+    # Remove bold, italics, headers, code blocks
+    text = re.sub(r'[*_#`]', '', text)
+    # Remove bullet points at the start of lines
+    text = re.sub(r'^[-\•]\s+', '', text, flags=re.MULTILINE)
+    # Replace remaining loose dashes
+    text = text.replace(' - ', ', ')
+    return text.strip()
+
+
 def text_to_speech(text: str, language: str = "English") -> bytes:
     """
     Convert text to speech audio using gTTS.
@@ -49,6 +66,7 @@ def text_to_speech(text: str, language: str = "English") -> bytes:
     Returns:
         Audio data as bytes (MP3 format).
     """
+    text = clean_for_tts(text)
     lang_code = LANGUAGE_MAP.get(language, "en")
     tts = gTTS(text=text, lang=lang_code)
     audio_buffer = io.BytesIO()

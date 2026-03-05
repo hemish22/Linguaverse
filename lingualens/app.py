@@ -98,10 +98,10 @@ st.markdown("""
 
     /* Result cards - Glassmorphism */
     .result-card {
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(226, 232, 240, 0.7);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.6);
         border-left: 4px solid #14B8A6;
         border-radius: 16px;
         padding: 1.75rem;
@@ -248,6 +248,16 @@ with st.sidebar:
 
     st.markdown("---")
     
+    # Target Audience
+    difficulty = st.selectbox(
+        "🧠 Explain For",
+        options=["Child (12 years old)", "Student", "Professional"],
+        index=1,
+        help="Adjust the simplicity and reading level of the explanation",
+    )
+
+    st.markdown("---")
+    
     # Input Language Selection (to fix EasyOCR incompatibility)
     source_language = st.selectbox(
         "📸 Image Text Language",
@@ -284,13 +294,15 @@ tab_upload, tab_camera = st.tabs(["📁 Upload Image", "📷 Capture from Webcam
 input_image = None
 
 with tab_upload:
-    uploaded_file = st.file_uploader(
-        "Choose an image file",
-        type=["png", "jpg", "jpeg", "bmp", "tiff", "webp"],
-        help="Upload an image containing text you want explained",
-    )
-    if uploaded_file is not None:
-        input_image = Image.open(uploaded_file)
+        uploaded_file = st.file_uploader(
+            "Choose an image...", 
+            type=["jpg", "jpeg", "png", "webp"],
+            label_visibility="collapsed"
+        )
+        st.markdown("<p style='color:#64748b; font-size: 0.95rem; text-align: center;'>Supported: forms, medicine labels, instructions, research papers</p>", unsafe_allow_html=True)
+        
+        if uploaded_file is not None:
+            input_image = Image.open(uploaded_file)
         st.markdown('<div class="image-container">', unsafe_allow_html=True)
         st.image(input_image, caption="Uploaded Image", width=400)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -324,7 +336,7 @@ if input_image is not None:
         # Step 1: OCR Extraction
         with st.status("🔄 Processing your image...", expanded=True) as status:
             st.write("📸 Extracting text from image...")
-            extracted_text = extract_text(input_image, source_language)
+            extracted_text, ocr_confidence = extract_text(input_image, source_language)
 
             if not extracted_text.strip():
                 status.update(
@@ -341,7 +353,7 @@ if input_image is not None:
 
                 # Step 2: LLM Processing
                 st.write("🧠 AI is simplifying and translating...")
-                result = simplify_and_translate(extracted_text, target_language)
+                result = simplify_and_translate(extracted_text, target_language, difficulty)
                 
                 status.update(
                     label="✅ Analysis complete!",
@@ -350,6 +362,13 @@ if input_image is not None:
                 )
 
                 # ─── Display Results ──────────────────────────────
+
+                st.markdown(f"""
+                <div style="display: flex; gap: 2rem; margin-bottom: 1rem; padding: 1rem; background: rgba(226, 232, 240, 0.4); border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div><span style="color: #64748b; font-size: 0.9rem;">OCR Confidence</span><br><strong>{ocr_confidence*100:.0f}%</strong></div>
+                    <div><span style="color: #64748b; font-size: 0.9rem;">Detected Language</span><br><strong>{result.get('detected_language', 'Unknown')}</strong></div>
+                </div>
+                """, unsafe_allow_html=True)
 
                 st.markdown("---")
 
@@ -368,7 +387,7 @@ if input_image is not None:
                     # Simple Explanation
                     st.markdown("""
                     <div class="result-card">
-                        <h3>💡 Simple Explanation</h3>
+                        <h3>💡 AI Simplified Explanation</h3>
                     </div>
                     """, unsafe_allow_html=True)
                     st.markdown(result["explanation"])

@@ -36,17 +36,18 @@ def _get_reader(lang_code="hi"):
     return _readers[lang_code]
 
 
-def extract_text(image, source_language_preset="English & Hindi") -> str:
+def extract_text(image, source_language_preset="English & Hindi") -> tuple[str, float]:
     """
-    Extract text from an image using EasyOCR.
+    Extract text and average confidence from an image using EasyOCR.
 
     Args:
         image: Can be a PIL Image, numpy array, or file path string.
         source_language_preset: The string from the Streamlit selectbox indicating the expected text.
 
     Returns:
-        Extracted text as a single string, with detected lines
-        joined by newlines. Returns empty string if no text is found.
+        Tuple containing:
+        - Extracted text as a single string, joined by newlines. Returns empty string if no text is found.
+        - Average confidence score (float between 0 and 1).
     """
     # Convert input to numpy array if needed
     if isinstance(image, str):
@@ -69,9 +70,15 @@ def extract_text(image, source_language_preset="English & Hindi") -> str:
     results = reader.readtext(img_array)
 
     if not results:
-        return ""
+        return "", 0.0
 
-    # Extract text from results and join with newlines
-    extracted_lines = [text for (_, text, confidence) in results if confidence > 0.2]
+    # Extract text and calculate average confidence
+    valid_results = [(text, conf) for (_, text, conf) in results if conf > 0.2]
+    
+    if not valid_results:
+        return "", 0.0
+        
+    extracted_lines = [text for text, _ in valid_results]
+    avg_confidence = float(sum(conf for _, conf in valid_results) / len(valid_results))
 
-    return "\n".join(extracted_lines)
+    return "\n".join(extracted_lines), avg_confidence
