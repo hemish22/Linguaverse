@@ -288,9 +288,10 @@ with st.sidebar:
 
 # ─── Main Content: Image Input ───────────────────────────────────────
 
-tab_upload, tab_camera = st.tabs(["📁 Upload Image", "📷 Capture from Webcam"])
+tab_upload, tab_camera, tab_text = st.tabs(["📁 Upload Image", "📷 Capture from Webcam", "✍️ Write Text Directly"])
 
 input_image = None
+direct_text_input = ""
 
 with tab_upload:
     uploaded_file = st.file_uploader(
@@ -326,26 +327,49 @@ with tab_camera:
         
     st.markdown('</div>', unsafe_allow_html=True)
 
+with tab_text:
+    st.markdown('<div class="result-card">', unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-bottom: 0;'>✍️ Write or Paste Text</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;'>Paste standard text here to bypass OCR extraction.</p>", unsafe_allow_html=True)
+    
+    text_input_area = st.text_area(
+        "Enter text to explain:", 
+        height=200, 
+        label_visibility="collapsed",
+        placeholder="Type or paste the complex text you want LinguaLens to simplify..."
+    )
+    
+    if text_input_area.strip():
+        direct_text_input = text_input_area.strip()
+        
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ─── Processing ──────────────────────────────────────────────────────
 
-if input_image is not None:
-    if st.button("🔍 Analyze Image", use_container_width=True, type="primary"):
+if input_image is not None or direct_text_input:
+    button_label = "🔍 Analyze Text" if direct_text_input else "🔍 Analyze Image"
+    if st.button(button_label, use_container_width=True, type="primary"):
 
-        # Step 1: OCR Extraction
-        with st.status("🔄 Processing your image...", expanded=True) as status:
-            st.write("📸 Extracting text from image...")
-            extracted_text, ocr_confidence = extract_text(input_image, source_language)
+        # Step 1: Text Retrieval (OCR or Direct)
+        with st.status("🔄 Processing your input...", expanded=True) as status:
+            if direct_text_input:
+                st.write("📝 Using directly inputted text...")
+                extracted_text = direct_text_input
+                ocr_confidence = 1.0 # Perfect confidence for direct text
+            else:
+                st.write("📸 Extracting text from image...")
+                extracted_text, ocr_confidence = extract_text(input_image, source_language)
 
             if not extracted_text.strip():
                 status.update(
-                    label="⚠️ No text detected",
+                    label="⚠️ No text detected or provided",
                     state="error",
                     expanded=True,
                 )
                 st.error(
-                    "Could not detect any text in the image. "
-                    "Please try with a clearer image or different angle."
+                    "Could not detect any text. "
+                    "Please provide valid text or a clearer image."
                 )
             else:
                 st.write(f"✅ Found {len(extracted_text.split())} words")
@@ -388,10 +412,12 @@ if input_image is not None:
                     
                     with exp_tab:
                         st.markdown(result["explanation"])
+                        st.code(result["explanation"], language=None)
 
                     with key_tab:
                         if result["key_points"]:
                             st.markdown(result["key_points"])
+                            st.code(result["key_points"], language=None)
                         else:
                             st.info("No key points generated.")
 
@@ -403,6 +429,7 @@ if input_image is not None:
                     </div>
                     """, unsafe_allow_html=True)
                     st.markdown(result["translation"])
+                    st.code(result["translation"], language=None)
 
                     # Text-to-Speech
                     st.markdown("""
@@ -425,9 +452,9 @@ if input_image is not None:
 else:
     st.markdown("""
     <div style="text-align: center; padding: 4rem 2rem; color: #9CA3AF;">
-        <p style="font-size: 4rem; margin-bottom: 1rem;">📸</p>
-        <h3 style="color: #2563EB; font-weight: 500;">Upload an image to get started</h3>
-        <p style="color: #9CA3AF;">Take a photo or upload an image containing text you want explained</p>
+        <p style="font-size: 4rem; margin-bottom: 1rem;">📸 / ✍️</p>
+        <h3 style="color: #2563EB; font-weight: 500;">Provide an image or text to get started</h3>
+        <p style="color: #9CA3AF;">Upload an image, take a photo, or directly paste text you want explained</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -436,6 +463,6 @@ else:
 
 st.markdown("""
 <div class="footer">
-    Built with ❤️ using Streamlit, EasyOCR, and Google Gemini | LinguaLens v1.0
+    Built By Hemish Jain and Anukool Kashyap
 </div>
 """, unsafe_allow_html=True)
