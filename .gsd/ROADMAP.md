@@ -74,7 +74,7 @@
 - Verify design matches premium Pro Max standards
 
 ### Phase 8: Native Theming & Deployment
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Fix Streamlit dark mode fallback and deploy code to GitHub.
 **Depends on**: Phase 7
 
@@ -87,3 +87,15 @@
 **Verification**:
 - UI correctly renders the uploader and sidebar in the intended light palette.
 - Code successfully pushed to GitHub.
+
+### Phase 9: Lazy Camera Activation
+**Status**: ✅ Complete
+**Objective**: Prevent `st.camera_input` from automatically asking for camera permissions on page load.
+**Depends on**: Phase 8
+
+**Tasks**:
+- [x] Wrap `st.camera_input` in an `st.toggle` within the Webcam tab.
+- [x] Commit and push fix to GitHub
+
+**Verification**:
+- The browser no longer requests camera access until the user explicitly toggles it on.

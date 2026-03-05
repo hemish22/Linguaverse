@@ -286,12 +286,24 @@ with tab_upload:
         st.markdown('</div>', unsafe_allow_html=True)
 
 with tab_camera:
-    camera_photo = st.camera_input(
-        "Take a photo of text you want explained",
-        help="Point your camera at a document, label, or sign",
-    )
-    if camera_photo is not None:
-        input_image = Image.open(camera_photo)
+    st.markdown('<div class="result-card" style="text-align: center;">', unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-bottom: 0;'>📷 Webcam Capture</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;'>Enable your camera to take a photo directly.</p>", unsafe_allow_html=True)
+    
+    enable_camera = st.toggle("Enable Webcam", value=False)
+    
+    if enable_camera:
+        camera_photo = st.camera_input(
+            "Take a photo of text you want explained",
+            help="Point your camera at a document, label, or sign",
+            label_visibility="collapsed"
+        )
+        if camera_photo is not None:
+            input_image = Image.open(camera_photo)
+    else:
+        st.info("💡 Tip: Click 'Enable Webcam' when you're ready to capture.")
+        
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ─── Processing ──────────────────────────────────────────────────────
