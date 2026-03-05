@@ -57,7 +57,7 @@ st.markdown("""
 
     /* Main header styling - Liquid Glass */
     .main-header {
-        background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(20, 184, 166, 0.85) 100%) !important;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.85) 0%, rgba(20, 184, 166, 0.85) 100%) !important;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         padding: 2.5rem 2rem;
@@ -96,28 +96,27 @@ st.markdown("""
         letter-spacing: 0.2px;
     }
 
-    /* Result cards - Glassmorphism */
+    /* Result cards - Solid light gray to contrast dark background */
     .result-card {
-        background: rgba(226, 232, 240, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        border-left: 4px solid #14B8A6;
+        background: #E5E7EB !important;
+        color: #0B0F19 !important; /* Dark text on light card */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-left: 4px solid #2563EB;
         border-radius: 16px;
         padding: 1.75rem;
         margin-bottom: 1.5rem;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
         transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         z-index: 10;
     }
     .result-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 32px rgba(20, 184, 166, 0.12);
-        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.2);
+        background: #f3f4f6 !important;
     }
     .result-card h3 {
-        color: #1E3A8A;
+        color: #2563EB !important;
         font-weight: 700;
         margin-bottom: 1rem;
         font-size: 1.25rem;
@@ -160,9 +159,9 @@ st.markdown("""
         border-radius: 8px;
     }
 
-    /* Button styling - Fluid Interactive */
+    /* Button styling - Amber Highlight */
     .stButton > button {
-        background: linear-gradient(135deg, #1E3A8A 0%, #14B8A6 100%) !important;
+        background: linear-gradient(135deg, #F59E0B 0%, #d97706 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 10px;
@@ -172,7 +171,7 @@ st.markdown("""
         letter-spacing: 0.3px;
         transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer !important;
-        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
         position: relative;
         overflow: hidden;
     }
@@ -186,14 +185,14 @@ st.markdown("""
     }
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(30, 58, 138, 0.35);
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
     }
     .stButton > button:hover::after {
         opacity: 1;
     }
     .stButton > button:active {
         transform: translateY(0);
-        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
     }
 
     /* Interactive Elements Cursor */
@@ -425,10 +424,10 @@ if input_image is not None:
 
 else:
     st.markdown("""
-    <div style="text-align: center; padding: 4rem 2rem; color: #9ca3af;">
+    <div style="text-align: center; padding: 4rem 2rem; color: #9CA3AF;">
         <p style="font-size: 4rem; margin-bottom: 1rem;">📸</p>
-        <h3 style="color: #1E3A8A; font-weight: 500;">Upload an image to get started</h3>
-        <p style="color: #64748b;">Take a photo or upload an image containing text you want explained</p>
+        <h3 style="color: #2563EB; font-weight: 500;">Upload an image to get started</h3>
+        <p style="color: #9CA3AF;">Take a photo or upload an image containing text you want explained</p>
     </div>
     """, unsafe_allow_html=True)
 
