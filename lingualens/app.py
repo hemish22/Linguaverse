@@ -294,15 +294,15 @@ tab_upload, tab_camera = st.tabs(["📁 Upload Image", "📷 Capture from Webcam
 input_image = None
 
 with tab_upload:
-        uploaded_file = st.file_uploader(
-            "Choose an image...", 
-            type=["jpg", "jpeg", "png", "webp"],
-            label_visibility="collapsed"
-        )
-        st.markdown("<p style='color:#64748b; font-size: 0.95rem; text-align: center;'>Supported: forms, medicine labels, instructions, research papers</p>", unsafe_allow_html=True)
-        
-        if uploaded_file is not None:
-            input_image = Image.open(uploaded_file)
+    uploaded_file = st.file_uploader(
+        "Choose an image...", 
+        type=["jpg", "jpeg", "png", "webp"],
+        label_visibility="collapsed"
+    )
+    st.markdown("<p style='color:#64748b; font-size: 0.95rem; text-align: center;'>Supported: forms, medicine labels, instructions, research papers</p>", unsafe_allow_html=True)
+    
+    if uploaded_file is not None:
+        input_image = Image.open(uploaded_file)
         st.markdown('<div class="image-container">', unsafe_allow_html=True)
         st.image(input_image, caption="Uploaded Image", width=400)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -384,22 +384,17 @@ if input_image is not None:
                 col_left, col_right = st.columns(2)
 
                 with col_left:
-                    # Simple Explanation
-                    st.markdown("""
-                    <div class="result-card">
-                        <h3>💡 AI Simplified Explanation</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown(result["explanation"])
+                    # Toggleable Tabs for Explanation and Key Points
+                    exp_tab, key_tab = st.tabs(["💡 AI Simplified Explanation", "🎯 Key Points"])
+                    
+                    with exp_tab:
+                        st.markdown(result["explanation"])
 
-                    # Key Points
-                    if result["key_points"]:
-                        st.markdown("""
-                        <div class="result-card">
-                            <h3>🎯 Key Points</h3>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        st.markdown(result["key_points"])
+                    with key_tab:
+                        if result["key_points"]:
+                            st.markdown(result["key_points"])
+                        else:
+                            st.info("No key points generated.")
 
                 with col_right:
                     # Translation

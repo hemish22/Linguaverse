@@ -135,7 +135,7 @@ def _parse_response(response_text: str, target_language: str) -> dict:
     
     # Use regex to robustly parse sections regardless of spacing
     detected_lang_match = re.search(r'## Detected Language\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
-    explanation_match = re.search(r'## (?:AI )?Simplified Explanation|## Simple Explanation\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    explanation_match = re.search(r'## (?:(?:AI )?Simplified Explanation|Simple Explanation)\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
     key_points_match = re.search(r'## Key Points\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
     translation_match = re.search(r'## Translation.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
 
