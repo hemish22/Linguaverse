@@ -15,7 +15,7 @@ import numpy as np
 
 # Import project modules
 from ocr_module import extract_text
-from llm_module import simplify_and_translate
+from llm_module import simplify_and_translate, answer_question, generate_suggested_questions
 from utils import text_to_speech, LANGUAGE_MAP
 
 
@@ -207,6 +207,27 @@ st.markdown("""
         font-weight: 600;
     }
 
+    /* Q&A Section Header */
+    .qa-header {
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%);
+        border: 1px solid rgba(20, 184, 166, 0.3);
+        border-left: 4px solid #14B8A6;
+        border-radius: 16px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .qa-header h3 {
+        color: #14B8A6 !important;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+    }
+    .qa-header p {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
     /* Footer */
     .footer {
         text-align: center;
@@ -221,12 +242,28 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# ─── Session State Initialization ─────────────────────────────────────
+
+if "ocr_text" not in st.session_state:
+    st.session_state.ocr_text = ""
+if "ocr_confidence" not in st.session_state:
+    st.session_state.ocr_confidence = 0.0
+if "analysis_result" not in st.session_state:
+    st.session_state.analysis_result = None
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+if "suggested_questions" not in st.session_state:
+    st.session_state.suggested_questions = []
+if "analysis_language" not in st.session_state:
+    st.session_state.analysis_language = "English"
+
+
 # ─── Header ──────────────────────────────────────────────────────────
 
 st.markdown("""
 <div class="main-header">
     <h1>🔍 LinguaLens</h1>
-    <p>Upload an image with text → Get simple explanations in your language</p>
+    <p>Upload a document → Get explanations in your language → Ask questions by text or voice</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -273,6 +310,7 @@ with st.sidebar:
     3. **AI** simplifies and explains it
     4. **Translation** in your chosen language
     5. **Listen** to the explanation (optional)
+    6. **Ask questions** about the document 💬
     """)
 
     st.markdown("---")
@@ -350,13 +388,15 @@ with tab_text:
 if input_image is not None or direct_text_input:
     button_label = "🔍 Analyze Text" if direct_text_input else "🔍 Analyze Image"
     if st.button(button_label, use_container_width=True, type="primary"):
+        # Clear previous Q&A history for new analysis
+        st.session_state.chat_history = []
 
         # Step 1: Text Retrieval (OCR or Direct)
         with st.status("🔄 Processing your input...", expanded=True) as status:
             if direct_text_input:
                 st.write("📝 Using directly inputted text...")
                 extracted_text = direct_text_input
-                ocr_confidence = 1.0 # Perfect confidence for direct text
+                ocr_confidence = 1.0
             else:
                 st.write("📸 Extracting text from image...")
                 extracted_text, ocr_confidence = extract_text(input_image, source_language)
@@ -371,85 +411,190 @@ if input_image is not None or direct_text_input:
                     "Could not detect any text. "
                     "Please provide valid text or a clearer image."
                 )
+                st.session_state.analysis_result = None
             else:
                 st.write(f"✅ Found {len(extracted_text.split())} words")
 
                 # Step 2: LLM Processing
                 st.write("🧠 AI is simplifying and translating...")
                 result = simplify_and_translate(extracted_text, target_language, difficulty)
-                
+
+                st.write("💡 Generating suggested questions...")
+                suggested = generate_suggested_questions(extracted_text, target_language)
+
+                # Save everything to session state for persistent display
+                st.session_state.ocr_text = extracted_text
+                st.session_state.ocr_confidence = ocr_confidence
+                st.session_state.analysis_result = result
+                st.session_state.suggested_questions = suggested
+                st.session_state.analysis_language = target_language
+
                 status.update(
                     label="✅ Analysis complete!",
                     state="complete",
                     expanded=False,
                 )
 
-                # ─── Display Results ──────────────────────────────
 
-                st.markdown(f"""
-                <div style="display: flex; gap: 2rem; margin-bottom: 1rem; padding: 1rem; background: rgba(226, 232, 240, 0.4); border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <div><span style="color: #64748b; font-size: 0.9rem;">OCR Confidence</span><br><strong>{ocr_confidence*100:.0f}%</strong></div>
-                    <div><span style="color: #64748b; font-size: 0.9rem;">Detected Language</span><br><strong>{result.get('detected_language', 'Unknown')}</strong></div>
-                </div>
-                """, unsafe_allow_html=True)
+# ─── Display Results (from session state) ────────────────────────────
 
-                st.markdown("---")
+if st.session_state.get("analysis_result"):
+    result = st.session_state.analysis_result
+    ocr_confidence = st.session_state.get("ocr_confidence", 0.0)
+    extracted_text = st.session_state.get("ocr_text", "")
 
-                # Extracted Text
-                st.markdown("""
-                <div class="result-card">
-                    <h3>📝 Extracted Text</h3>
-                </div>
-                """, unsafe_allow_html=True)
-                st.code(extracted_text, language=None)
+    st.markdown(f"""
+    <div style="display: flex; gap: 2rem; margin-bottom: 1rem; padding: 1rem; background: rgba(226, 232, 240, 0.4); border-radius: 8px; border: 1px solid #e2e8f0;">
+        <div><span style="color: #64748b; font-size: 0.9rem;">OCR Confidence</span><br><strong>{ocr_confidence*100:.0f}%</strong></div>
+        <div><span style="color: #64748b; font-size: 0.9rem;">Detected Language</span><br><strong>{result.get('detected_language', 'Unknown')}</strong></div>
+    </div>
+    """, unsafe_allow_html=True)
 
-                # Two-column layout for explanation and translation
-                col_left, col_right = st.columns(2)
+    st.markdown("---")
 
-                with col_left:
-                    # Toggleable Tabs for Explanation and Key Points
-                    exp_tab, key_tab = st.tabs(["💡 AI Simplified Explanation", "🎯 Key Points"])
-                    
-                    with exp_tab:
-                        st.markdown(result["explanation"])
-                        st.code(result["explanation"], language=None)
+    # Extracted Text
+    st.markdown("""
+    <div class="result-card">
+        <h3>📝 Extracted Text</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    st.code(extracted_text, language=None)
 
-                    with key_tab:
-                        if result["key_points"]:
-                            st.markdown(result["key_points"])
-                            st.code(result["key_points"], language=None)
-                        else:
-                            st.info("No key points generated.")
+    # Two-column layout for explanation and translation
+    col_left, col_right = st.columns(2)
 
-                with col_right:
-                    # Translation
-                    st.markdown(f"""
-                    <div class="result-card">
-                        <h3>🌐 Translation ({target_language})</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown(result["translation"])
-                    st.code(result["translation"], language=None)
+    with col_left:
+        # Toggleable Tabs for Explanation and Key Points
+        exp_tab, key_tab = st.tabs(["💡 AI Simplified Explanation", "🎯 Key Points"])
 
-                    # Text-to-Speech
-                    st.markdown("""
-                    <div class="result-card">
-                        <h3>🔊 Listen</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
+        with exp_tab:
+            st.markdown(result["explanation"])
+            st.code(result["explanation"], language=None)
 
-                    tts_text = result["translation"] if result["translation"] else result["explanation"]
-                    
+        with key_tab:
+            if result["key_points"]:
+                st.markdown(result["key_points"])
+                st.code(result["key_points"], language=None)
+            else:
+                st.info("No key points generated.")
+
+    with col_right:
+        # Translation
+        st.markdown(f"""
+        <div class="result-card">
+            <h3>🌐 Translation ({target_language})</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown(result["translation"])
+        st.code(result["translation"], language=None)
+
+        # Text-to-Speech
+        st.markdown("""
+        <div class="result-card">
+            <h3>🔊 Listen</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
+        tts_text = result["translation"] if result["translation"] else result["explanation"]
+
+        try:
+            audio_bytes = text_to_speech(tts_text, target_language)
+            st.audio(audio_bytes, format="audio/mp3")
+        except Exception as e:
+            st.warning(f"Text-to-speech unavailable: {str(e)}")
+
+    # ─── Document Q&A Section ────────────────────────────────────────
+
+    st.markdown("---")
+    st.markdown("""
+    <div class="qa-header">
+        <h3>💬 Ask Questions About This Document</h3>
+        <p>Ask in any language — type or speak your question</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Suggested questions
+    if st.session_state.get("suggested_questions"):
+        st.markdown("**💡 Suggested questions:**")
+        sq_cols = st.columns(min(3, len(st.session_state.suggested_questions)))
+        for i, sq in enumerate(st.session_state.suggested_questions):
+            with sq_cols[i % 3]:
+                if st.button(sq, key=f"sq_{i}", use_container_width=True):
+                    with st.spinner("🤔 Thinking..."):
+                        sq_answer = answer_question(
+                            st.session_state.ocr_text,
+                            target_language,
+                            question_text=sq,
+                        )
+                    st.session_state.chat_history.append({"role": "user", "content": sq})
+                    st.session_state.chat_history.append({"role": "assistant", "content": sq_answer})
+                    st.rerun()
+
+    # Text question input (form allows Enter to submit + auto-clear)
+    with st.form("qa_form", clear_on_submit=True):
+        user_question = st.text_input(
+            "Type your question in any language...",
+            placeholder="e.g., What documents are required? / इस फॉर्म में क्या भरना है? / இதில் என்ன நிரப்ப வேண்டும்?",
+            label_visibility="collapsed",
+        )
+        ask_submitted = st.form_submit_button("💬 Ask Question", use_container_width=True)
+
+    if ask_submitted and user_question.strip():
+        with st.spinner("🤔 Thinking..."):
+            text_answer = answer_question(
+                st.session_state.ocr_text,
+                target_language,
+                question_text=user_question,
+            )
+        st.session_state.chat_history.append({"role": "user", "content": user_question})
+        st.session_state.chat_history.append({"role": "assistant", "content": text_answer})
+        st.rerun()
+
+    # Voice question input
+    st.markdown(
+        '<p style="text-align: center; color: #64748b; margin: 0.5rem 0;">— OR —</p>',
+        unsafe_allow_html=True,
+    )
+
+    voice_col1, voice_col2 = st.columns([3, 1])
+    with voice_col1:
+        voice_audio = st.audio_input(
+            "🎤 Record your question in any language",
+            key="voice_q_input",
+        )
+    with voice_col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        send_voice = st.button("📤 Send", key="send_voice_btn", use_container_width=True)
+
+    if send_voice and voice_audio is not None:
+        with st.spinner("🎧 Listening and thinking..."):
+            audio_data = voice_audio.read()
+            voice_answer = answer_question(
+                st.session_state.ocr_text,
+                target_language,
+                audio_bytes=audio_data,
+            )
+        st.session_state.chat_history.append({"role": "user", "content": "🎤 Voice question"})
+        st.session_state.chat_history.append({"role": "assistant", "content": voice_answer})
+        st.rerun()
+
+    # Display conversation history
+    if st.session_state.get("chat_history"):
+        st.markdown("### 📜 Conversation History")
+        for idx, msg in enumerate(st.session_state.chat_history):
+            with st.chat_message("user" if msg["role"] == "user" else "assistant"):
+                st.markdown(msg["content"])
+                if msg["role"] == "assistant":
                     try:
-                        audio_bytes = text_to_speech(tts_text, target_language)
-                        st.audio(audio_bytes, format="audio/mp3")
-                    except Exception as e:
-                        st.warning(f"Text-to-speech unavailable: {str(e)}")
+                        ans_audio = text_to_speech(msg["content"], target_language)
+                        st.audio(ans_audio, format="audio/mp3")
+                    except Exception:
+                        pass
 
 
 # ─── Empty State ──────────────────────────────────────────────────────
 
-else:
+elif not (input_image is not None or direct_text_input):
     st.markdown("""
     <div style="text-align: center; padding: 4rem 2rem; color: #9CA3AF;">
         <p style="font-size: 4rem; margin-bottom: 1rem;">📸 / ✍️</p>
