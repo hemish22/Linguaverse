@@ -36,19 +36,31 @@ st.markdown("""
     /* Import Google Font */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    /* Global font */
+    /* ── Color Palette ─────────────────────────────────
+       Primary:    Deep Blue   #1E3A8A
+       Secondary:  Teal        #14B8A6
+       Accent:     Soft Orange #F59E0B
+       Background: Light Gray  #F8FAFC
+       Text:       Dark Gray   #1F2937
+    ───────────────────────────────────────────────── */
+
+    /* Global font & background */
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
+        color: #1F2937;
+    }
+    .stApp {
+        background-color: #F8FAFC;
     }
 
     /* Main header styling */
     .main-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1E3A8A 0%, #14B8A6 100%);
         padding: 2rem 2rem;
         border-radius: 16px;
         margin-bottom: 2rem;
         text-align: center;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 32px rgba(30, 58, 138, 0.3);
     }
     .main-header h1 {
         color: white;
@@ -58,7 +70,7 @@ st.markdown("""
         letter-spacing: -0.5px;
     }
     .main-header p {
-        color: rgba(255, 255, 255, 0.85);
+        color: rgba(255, 255, 255, 0.9);
         font-size: 1.1rem;
         margin-top: 0.5rem;
         font-weight: 300;
@@ -66,8 +78,9 @@ st.markdown("""
 
     /* Result cards */
     .result-card {
-        background: linear-gradient(145deg, #f8f9ff 0%, #ffffff 100%);
-        border: 1px solid rgba(102, 126, 234, 0.15);
+        background: linear-gradient(145deg, #F8FAFC 0%, #ffffff 100%);
+        border: 1px solid rgba(20, 184, 166, 0.2);
+        border-left: 4px solid #14B8A6;
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1rem;
@@ -76,10 +89,10 @@ st.markdown("""
     }
     .result-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.12);
+        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.15);
     }
     .result-card h3 {
-        color: #667eea;
+        color: #1E3A8A;
         font-weight: 600;
         margin-bottom: 0.75rem;
         font-size: 1.1rem;
@@ -87,45 +100,48 @@ st.markdown("""
 
     /* Sidebar styling */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        background: linear-gradient(180deg, #0f172a 0%, #1E3A8A 100%);
     }
     [data-testid="stSidebar"] .stMarkdown h2 {
-        color: #a8b4ff;
+        color: #14B8A6;
     }
-    [data-testid="stSidebar"] .stMarkdown p, 
+    [data-testid="stSidebar"] .stMarkdown p,
     [data-testid="stSidebar"] .stMarkdown li {
-        color: #c8d0e7;
+        color: #cbd5e1;
+    }
+    [data-testid="stSidebar"] .stSelectbox label {
+        color: #cbd5e1;
     }
 
-    /* Status badge */
-    .status-badge {
-        display: inline-block;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
-    .status-processing {
-        background: #fff3cd;
-        color: #856404;
-    }
-    .status-done {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    /* Uploaded image container */
+    /* Uploaded image container — constrained size */
     .image-container {
-        border: 2px dashed rgba(102, 126, 234, 0.3);
+        border: 2px dashed rgba(20, 184, 166, 0.4);
         border-radius: 12px;
-        padding: 1rem;
+        padding: 0.75rem;
         text-align: center;
-        background: rgba(102, 126, 234, 0.02);
+        background: rgba(20, 184, 166, 0.03);
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    .image-container img {
+        max-height: 300px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    /* Reduce default Streamlit image size */
+    [data-testid="stImage"] {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    [data-testid="stImage"] img {
+        max-height: 300px;
+        object-fit: contain;
     }
 
     /* Button styling */
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1E3A8A 0%, #14B8A6 100%);
         color: white;
         border: none;
         border-radius: 8px;
@@ -135,17 +151,23 @@ st.markdown("""
     }
     .stButton > button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
+    }
+
+    /* Accent highlight for important elements */
+    .accent-highlight {
+        color: #F59E0B;
+        font-weight: 600;
     }
 
     /* Footer */
     .footer {
         text-align: center;
-        color: #9ca3af;
+        color: #64748b;
         font-size: 0.85rem;
         margin-top: 3rem;
         padding: 1rem;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid #e2e8f0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -211,7 +233,7 @@ with tab_upload:
     if uploaded_file is not None:
         input_image = Image.open(uploaded_file)
         st.markdown('<div class="image-container">', unsafe_allow_html=True)
-        st.image(input_image, caption="Uploaded Image", use_container_width=True)
+        st.image(input_image, caption="Uploaded Image", width=400)
         st.markdown('</div>', unsafe_allow_html=True)
 
 with tab_camera:
@@ -320,8 +342,8 @@ else:
     st.markdown("""
     <div style="text-align: center; padding: 4rem 2rem; color: #9ca3af;">
         <p style="font-size: 4rem; margin-bottom: 1rem;">📸</p>
-        <h3 style="color: #6b7280; font-weight: 500;">Upload an image to get started</h3>
-        <p>Take a photo or upload an image containing text you want explained</p>
+        <h3 style="color: #1E3A8A; font-weight: 500;">Upload an image to get started</h3>
+        <p style="color: #64748b;">Take a photo or upload an image containing text you want explained</p>
     </div>
     """, unsafe_allow_html=True)
 
