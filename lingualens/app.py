@@ -29,12 +29,17 @@ st.set_page_config(
 )
 
 
+import time # Added for cache busting
+
 # ─── Custom CSS for Premium Look ─────────────────────────────────────
+
+# Generate a timestamp to act as a cache buster for the CSS
+CACHE_BUSTER = int(time.time())
 
 st.markdown("""
 <style>
-    /* Import Google Font - DM Sans for Premium Look */
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+    /* Import Google Font - DM Sans for Premium Look with cache busting */
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap&v=""" + str(CACHE_BUSTER) + """');
 
     /* ── Color Palette ─────────────────────────────────
        Primary:    Deep Blue   #1E3A8A
@@ -46,17 +51,17 @@ st.markdown("""
 
     /* Global font & background */
     html, body, [class*="css"] {
-        font-family: 'DM Sans', sans-serif;
-        color: #1F2937;
-        line-height: 1.6;
+        font-family: 'DM Sans', sans-serif !important;
+        color: #1F2937 !important;
+        line-height: 1.6 !important;
     }
     .stApp {
-        background-color: #F8FAFC;
+        background-color: #F8FAFC !important;
     }
 
     /* Main header styling - Liquid Glass */
     .main-header {
-        background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(20, 184, 166, 0.85) 100%);
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(20, 184, 166, 0.85) 100%) !important;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         padding: 2.5rem 2rem;
@@ -179,9 +184,9 @@ st.markdown("""
 
     /* Button styling - Fluid Interactive */
     .stButton > button {
-        background: linear-gradient(135deg, #1E3A8A 0%, #14B8A6 100%);
-        color: white;
-        border: none;
+        background: linear-gradient(135deg, #1E3A8A 0%, #14B8A6 100%) !important;
+        color: white !important;
+        border: none !important;
         border-radius: 10px;
         padding: 0.75rem 1.75rem;
         font-weight: 600;
