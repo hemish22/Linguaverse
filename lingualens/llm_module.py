@@ -139,13 +139,13 @@ def _parse_response(response_text: str, target_language: str) -> dict:
     key_points_match = re.search(r'## Key Points\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
     translation_match = re.search(r'## Translation.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
 
-    explanation = explanation_match.group(1).strip() if explanation_match else ""
-    key_points = key_points_match.group(1).strip() if key_points_match else ""
-    translation = translation_match.group(1).strip() if translation_match else ""
-    detected_lang = detected_lang_match.group(1).strip() if detected_lang_match else "Unknown"
+    explanation = explanation_match.group(1).strip() if (explanation_match and explanation_match.group(1)) else ""
+    key_points = key_points_match.group(1).strip() if (key_points_match and key_points_match.group(1)) else ""
+    translation = translation_match.group(1).strip() if (translation_match and translation_match.group(1)) else ""
+    detected_lang = detected_lang_match.group(1).strip() if (detected_lang_match and detected_lang_match.group(1)) else "Unknown"
 
     if not explanation and not key_points and not translation:
-        explanation = response_text
+        explanation = str(response_text).strip() if response_text else ""
         
     return {
         "detected_language": detected_lang,
