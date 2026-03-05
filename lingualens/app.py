@@ -33,8 +33,8 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* Import Google Font */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    /* Import Google Font - DM Sans for Premium Look */
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
     /* ── Color Palette ─────────────────────────────────
        Primary:    Deep Blue   #1E3A8A
@@ -46,87 +46,124 @@ st.markdown("""
 
     /* Global font & background */
     html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
+        font-family: 'DM Sans', sans-serif;
         color: #1F2937;
+        line-height: 1.6;
     }
     .stApp {
         background-color: #F8FAFC;
     }
 
-    /* Main header styling */
+    /* Main header styling - Liquid Glass */
     .main-header {
-        background: linear-gradient(135deg, #1E3A8A 0%, #14B8A6 100%);
-        padding: 2rem 2rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(20, 184, 166, 0.85) 100%);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2.5rem;
         text-align: center;
-        box-shadow: 0 8px 32px rgba(30, 58, 138, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 40px rgba(30, 58, 138, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        opacity: 0.5;
+        pointer-events: none;
     }
     .main-header h1 {
         color: white;
-        font-size: 2.5rem;
+        font-size: 3rem;
         font-weight: 700;
         margin: 0;
-        letter-spacing: -0.5px;
+        letter-spacing: -1px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     .main-header p {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 1.1rem;
-        margin-top: 0.5rem;
-        font-weight: 300;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.15rem;
+        margin-top: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0.2px;
     }
 
-    /* Result cards */
+    /* Result cards - Glassmorphism */
     .result-card {
-        background: linear-gradient(145deg, #F8FAFC 0%, #ffffff 100%);
-        border: 1px solid rgba(20, 184, 166, 0.2);
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
         border-left: 4px solid #14B8A6;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 16px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+        transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 10;
     }
     .result-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.15);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(20, 184, 166, 0.12);
+        background: rgba(255, 255, 255, 0.9);
     }
     .result-card h3 {
         color: #1E3A8A;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+        letter-spacing: -0.3px;
     }
 
-    /* Sidebar styling */
+    /* Sidebar styling - Modern Dark */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #1E3A8A 100%);
+        border-right: 1px solid rgba(255,255,255,0.05);
     }
     [data-testid="stSidebar"] .stMarkdown h2 {
         color: #14B8A6;
+        font-weight: 600;
+        letter-spacing: -0.5px;
     }
     [data-testid="stSidebar"] .stMarkdown p,
     [data-testid="stSidebar"] .stMarkdown li {
         color: #cbd5e1;
+        font-weight: 400;
     }
     [data-testid="stSidebar"] .stSelectbox label {
         color: #cbd5e1;
+        font-weight: 500;
     }
 
-    /* Uploaded image container — constrained size */
+    /* Uploaded image container — constrained size with fluid styling */
     .image-container {
         border: 2px dashed rgba(20, 184, 166, 0.4);
-        border-radius: 12px;
-        padding: 0.75rem;
+        border-radius: 16px;
+        padding: 1rem;
         text-align: center;
-        background: rgba(20, 184, 166, 0.03);
+        background: rgba(20, 184, 166, 0.02);
         max-width: 400px;
         margin: 0 auto;
+        transition: all 300ms ease;
+    }
+    .image-container:hover {
+        border-color: rgba(20, 184, 166, 0.8);
+        background: rgba(20, 184, 166, 0.05);
     }
     .image-container img {
         max-height: 300px;
         width: auto;
         object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     /* Reduce default Streamlit image size */
@@ -137,21 +174,49 @@ st.markdown("""
     [data-testid="stImage"] img {
         max-height: 300px;
         object-fit: contain;
+        border-radius: 8px;
     }
 
-    /* Button styling */
+    /* Button styling - Fluid Interactive */
     .stButton > button {
         background: linear-gradient(135deg, #1E3A8A 0%, #14B8A6 100%);
         color: white;
         border: none;
-        border-radius: 8px;
-        padding: 0.6rem 1.5rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
+        border-radius: 10px;
+        padding: 0.75rem 1.75rem;
+        font-weight: 600;
+        font-size: 1.05rem;
+        letter-spacing: 0.3px;
+        transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer !important;
+        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    .stButton > button::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(rgba(255,255,255,0.2), transparent);
+        opacity: 0;
+        transition: opacity 250ms ease;
     }
     .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(30, 58, 138, 0.35);
+    }
+    .stButton > button:hover::after {
+        opacity: 1;
+    }
+    .stButton > button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
+    }
+
+    /* Interactive Elements Cursor */
+    [data-testid="stFileUploader"] section, 
+    .stSelectbox div[role="button"] {
+        cursor: pointer !important;
     }
 
     /* Accent highlight for important elements */
@@ -164,10 +229,11 @@ st.markdown("""
     .footer {
         text-align: center;
         color: #64748b;
-        font-size: 0.85rem;
-        margin-top: 3rem;
-        padding: 1rem;
-        border-top: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+        font-weight: 400;
+        margin-top: 4rem;
+        padding: 1.5rem;
+        border-top: 1px solid rgba(30, 58, 138, 0.1);
     }
 </style>
 """, unsafe_allow_html=True)
