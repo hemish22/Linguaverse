@@ -60,16 +60,30 @@
 - Updated sidebar, header, buttons, and result cards to match palette
 
 ### Phase 6: UI/UX Pro Max Refinement
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Improve the look of the website using the ui-ux-pro-max skill guidelines
 **Depends on**: Phase 5
 
 **Tasks**:
-- [ ] Run ui-ux-pro-max search to generate a premium design system
-- [ ] Implement recommended styles, typography, and UX best practices in Streamlit CSS
-- [ ] Add animations and hover effects per guidelines
-- [ ] Verify accessibility requirements
+- [x] Run ui-ux-pro-max search to generate a premium design system
+- [x] Implement recommended styles, typography, and UX best practices in Streamlit CSS
+- [x] Add animations and hover effects per guidelines
+- [x] Verify accessibility requirements
 
 **Verification**:
 - Verify design matches premium Pro Max standards
 
+### Phase 8: Native Theming & Deployment
+**Status**: ⬜ Not Started
+**Objective**: Fix Streamlit dark mode fallback and deploy code to GitHub.
+**Depends on**: Phase 7
+
+**Tasks**:
+- [ ] Create `.streamlit/config.toml` to enforce light theme
+- [ ] Simplify `app.py` CSS to rely on native theming for the sidebar and widgets
+- [ ] Initialize Git remote to `https://github.com/hemish22/Linguaverse.git`
+- [ ] Push codebase to `main` branch
+
+**Verification**:
+- UI correctly renders the uploader and sidebar in the intended light palette.
+- Code successfully pushed to GitHub.

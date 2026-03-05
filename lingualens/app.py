@@ -49,14 +49,10 @@ st.markdown("""
        Text:       Dark Gray   #1F2937
     ───────────────────────────────────────────────── */
 
-    /* Global font & background */
+    /* Global font */
     html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif !important;
-        color: #1F2937 !important;
         line-height: 1.6 !important;
-    }
-    .stApp {
-        background-color: #F8FAFC !important;
     }
 
     /* Main header styling - Liquid Glass */
@@ -128,25 +124,7 @@ st.markdown("""
         letter-spacing: -0.3px;
     }
 
-    /* Sidebar styling - Modern Dark */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #1E3A8A 100%);
-        border-right: 1px solid rgba(255,255,255,0.05);
-    }
-    [data-testid="stSidebar"] .stMarkdown h2 {
-        color: #14B8A6;
-        font-weight: 600;
-        letter-spacing: -0.5px;
-    }
-    [data-testid="stSidebar"] .stMarkdown p,
-    [data-testid="stSidebar"] .stMarkdown li {
-        color: #cbd5e1;
-        font-weight: 400;
-    }
-    [data-testid="stSidebar"] .stSelectbox label {
-        color: #cbd5e1;
-        font-weight: 500;
-    }
+
 
     /* Uploaded image container — constrained size with fluid styling */
     .image-container {
