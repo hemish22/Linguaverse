@@ -11,33 +11,38 @@ from PIL import Image
 from utils import preprocess_image
 
 
-# Module-level reader instance (lazy-loaded)
-_reader = None
+# Module-level reader instances (lazy-loaded to avoid memory bloat)
+_readers = {}
 
 
-def _get_reader():
+def _get_reader(lang_code="hi"):
     """
     Lazily initialize and return the EasyOCR reader.
     Supports English, Hindi, and Tamil text detection.
-    The reader is cached at module level to avoid repeated model loading.
+    Maintains separate readers for mutually-exclusive language models (like Hindi vs Tamil).
     """
-    global _reader
-    if _reader is None:
-        # Initialize with multilingual support
+    global _readers
+    
+    # EasyOCR doesn't allow combining Tamil ('ta') with Hindi ('hi'). They must run in separate readers.
+    if lang_code not in _readers:
+        lang_list = ["en", "ta"] if lang_code == "ta" else ["en", "hi"]
+        
         # gpu=True will use GPU if available, falls back to CPU otherwise
-        _reader = easyocr.Reader(
-            ["en", "hi", "ta"],
+        _readers[lang_code] = easyocr.Reader(
+            lang_list,
             gpu=True
         )
-    return _reader
+        
+    return _readers[lang_code]
 
 
-def extract_text(image) -> str:
+def extract_text(image, source_language_preset="English & Hindi") -> str:
     """
     Extract text from an image using EasyOCR.
 
     Args:
         image: Can be a PIL Image, numpy array, or file path string.
+        source_language_preset: The string from the Streamlit selectbox indicating the expected text.
 
     Returns:
         Extracted text as a single string, with detected lines
@@ -55,7 +60,10 @@ def extract_text(image) -> str:
     else:
         raise TypeError(f"Unsupported image type: {type(image)}")
 
-    reader = _get_reader()
+    # Determine the primary language code from the UI preset
+    lang_code = "ta" if "Tamil" in source_language_preset else "hi"
+
+    reader = _get_reader(lang_code)
 
     # Run OCR — returns list of (bbox, text, confidence) tuples
     results = reader.readtext(img_array)

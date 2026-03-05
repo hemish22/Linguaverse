@@ -247,6 +247,16 @@ with st.sidebar:
     )
 
     st.markdown("---")
+    
+    # Input Language Selection (to fix EasyOCR incompatibility)
+    source_language = st.selectbox(
+        "📸 Image Text Language",
+        options=["English & Hindi", "English & Tamil"],
+        index=0,
+        help="Select which language is present in the image. EasyOCR cannot load Hindi and Tamil simultaneously.",
+    )
+
+    st.markdown("---")
     st.markdown("## 📖 How it works")
     st.markdown("""
     1. **Upload** an image with text
@@ -314,7 +324,7 @@ if input_image is not None:
         # Step 1: OCR Extraction
         with st.status("🔄 Processing your image...", expanded=True) as status:
             st.write("📸 Extracting text from image...")
-            extracted_text = extract_text(input_image)
+            extracted_text = extract_text(input_image, source_language)
 
             if not extracted_text.strip():
                 status.update(
