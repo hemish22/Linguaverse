@@ -49,11 +49,9 @@ st.markdown("""
        Text:       Dark Gray   #1F2937
     ───────────────────────────────────────────────── */
 
-    /* Hide Streamlit Default UI */
+    /* Hide Streamlit Default UI but keep sidebar toggle */
     #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
     footer {visibility: hidden;}
-    .stApp > header {visibility: hidden;}
     [data-testid="stToolbar"] {visibility: hidden;}
     [data-testid="stDecoration"] {visibility: hidden;}
     [data-testid="manage-app-button"] {display: none;}
