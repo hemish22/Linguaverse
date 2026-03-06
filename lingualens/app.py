@@ -75,10 +75,10 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Small text for explanations */
+    /* Text for explanations - bumped size for readability */
     .small-text, .small-text p, .small-text li {
-        font-size: 0.9rem !important;
-        line-height: 1.5 !important;
+        font-size: 1.15rem !important;
+        line-height: 1.6 !important;
     }
 
     /* Global font */

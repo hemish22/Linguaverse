@@ -1,3 +1,6 @@
+### Phase 20: Typography Optimization & Regex Tuning
+**Status**: ✅ Complete
+
 ### Phase 19: Strict Fallback Newline Parsing
 **Status**: ✅ Complete
 
@@ -53,6 +56,18 @@
 
 **Tasks**:
 - [ ] TBD (run /plan 19 to create)
+
+**Verification**:
+- TBD
+---
+
+### Phase 20: Typography Optimization & Regex Tuning
+**Status**: ⬜ Not Started
+**Objective**: Increase the font size of the output for better readability, and fix the aggressive bullet regex that is splitting sentences in half.
+**Depends on**: Phase 19
+
+**Tasks**:
+- [ ] TBD (run /plan 20 to create)
 
 **Verification**:
 - TBD

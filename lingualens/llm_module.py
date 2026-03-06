@@ -60,19 +60,15 @@ Format your response EXACTLY like this (use these exact headers):
 
 ## Key Points
 
-* [Single-liner actionable point 1]
-
-* [Single-liner actionable point 2]
-
-* [Single-liner actionable point 3]
+1. [Single-liner actionable point 1]
+2. [Single-liner actionable point 2]
+3. [Single-liner actionable point 3]
 
 ## Translated Key Points ({target_language})
 
-* [Translated point 1]
-
-* [Translated point 2]
-
-* [Translated point 3]
+1. [Translated point 1]
+2. [Translated point 2]
+3. [Translated point 3]
 
 ## Detailed Explanation
 [Your simple explanation tailored for a {difficulty}]
@@ -154,13 +150,6 @@ def _parse_response(response_text: str, target_language: str) -> dict:
 
     key_points = key_points_match.group(1).strip() if (key_points_match and key_points_match.group(1)) else ""
     translated_key_points = translated_kp_match.group(1).strip() if (translated_kp_match and translated_kp_match.group(1)) else ""
-    
-    # Strictly enforce newlines for bullet points in case the LLM generates inline lists
-    key_points = re.sub(r'(?<!^)\s*\*\s*', '\n\n* ', key_points)
-    key_points = re.sub(r'(?<!^)\s*-\s*', '\n\n- ', key_points)
-    
-    translated_key_points = re.sub(r'(?<!^)\s*\*\s*', '\n\n* ', translated_key_points)
-    translated_key_points = re.sub(r'(?<!^)\s*-\s*', '\n\n- ', translated_key_points)
 
     explanation = explanation_match.group(1).strip() if (explanation_match and explanation_match.group(1)) else ""
     translation = translation_match.group(1).strip() if (translation_match and translation_match.group(1)) else ""
