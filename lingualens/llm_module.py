@@ -154,6 +154,14 @@ def _parse_response(response_text: str, target_language: str) -> dict:
 
     key_points = key_points_match.group(1).strip() if (key_points_match and key_points_match.group(1)) else ""
     translated_key_points = translated_kp_match.group(1).strip() if (translated_kp_match and translated_kp_match.group(1)) else ""
+    
+    # Strictly enforce newlines for bullet points in case the LLM generates inline lists
+    key_points = re.sub(r'(?<!^)\s*\*\s*', '\n\n* ', key_points)
+    key_points = re.sub(r'(?<!^)\s*-\s*', '\n\n- ', key_points)
+    
+    translated_key_points = re.sub(r'(?<!^)\s*\*\s*', '\n\n* ', translated_key_points)
+    translated_key_points = re.sub(r'(?<!^)\s*-\s*', '\n\n- ', translated_key_points)
+
     explanation = explanation_match.group(1).strip() if (explanation_match and explanation_match.group(1)) else ""
     translation = translation_match.group(1).strip() if (translation_match and translation_match.group(1)) else ""
     detected_lang = detected_lang_match.group(1).strip() if (detected_lang_match and detected_lang_match.group(1)) else "Unknown"

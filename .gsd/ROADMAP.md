@@ -1,3 +1,6 @@
+### Phase 19: Strict Fallback Newline Parsing
+**Status**: ✅ Complete
+
 ### Phase 18: Layout Streamlining & Language Localization
 **Status**: ✅ Complete
 
@@ -26,6 +29,30 @@
 
 **Tasks**:
 - [ ] TBD (run /plan 18 to create)
+
+**Verification**:
+- TBD
+---
+
+### Phase 19: Strict Fallback Newline Parsing
+**Status**: ⬜ Not Started
+**Objective**: Force bullet points to render on new lines by injecting double newlines () via regex during the parsing step, overriding unpredictable LLM whitespace formatting.
+**Depends on**: Phase 18
+
+**Tasks**:
+- [ ] TBD (run /plan 19 to create)
+
+**Verification**:
+- TBD
+---
+
+### Phase 19: Strict Fallback Newline Parsing
+**Status**: ⬜ Not Started
+**Objective**: Force bullet points to render on new lines by injecting double newlines via regex.
+**Depends on**: Phase 18
+
+**Tasks**:
+- [ ] TBD (run /plan 19 to create)
 
 **Verification**:
 - TBD
