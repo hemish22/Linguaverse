@@ -153,3 +153,82 @@ def _parse_response(response_text: str, target_language: str) -> dict:
         "key_points": key_points,
         "translation": translation,
     }
+
+
+def generate_suggested_questions(document_text: str, target_language: str = "English") -> list:
+    """
+    Generate 3 practical suggested questions about the document.
+
+    Args:
+        document_text: The OCR-extracted text.
+        target_language: Language for the suggested questions.
+
+    Returns:
+        A list of up to 3 question strings.
+    """
+    if not document_text or not document_text.strip():
+        return []
+
+    model = _get_model()
+    prompt = f"""Based on the following document text, generate exactly 3 short, practical questions
+that a user might want to ask about this document.
+
+Document text:
+\"\"\"
+{document_text}
+\"\"\"
+
+Return ONLY the 3 questions, one per line, in {target_language}.
+No numbering, no bullets, no extra text.
+Keep each question under 12 words."""
+
+    try:
+        response = model.generate_content(prompt)
+        questions = [q.strip() for q in response.text.strip().split("\n") if q.strip()]
+        return questions[:3]
+    except Exception:
+        return []
+
+
+def answer_question(document_text: str, target_language: str, question_text: str = None, audio_bytes: bytes = None) -> str:
+    """
+    Answers a user's question about the document text using Gemini.
+    Supports either text or audio input.
+    """
+    if not document_text.strip():
+        return "Please upload a document first."
+        
+    if not question_text and not audio_bytes:
+        return "Please provide a question."
+
+    model = _get_model()
+    
+    prompt = f"""You are an incredibly helpful assistant helping users understand documents.
+
+Document text:
+\"\"\"
+{document_text}
+\"\"\"
+
+User question:
+{question_text if question_text else '(Please listen to the attached audio question)'}
+
+Rules:
+1. Answer using ONLY the information in the document.
+2. If the answer is not present, say exactly: "The document does not mention this."
+3. Explain clearly, simply, and directly.
+4. IMPORTANT: You must provide your final answer in the following language: {target_language}.
+"""
+
+    contents = [prompt]
+    if audio_bytes:
+        contents.append({
+            "mime_type": "audio/wav",
+            "data": audio_bytes
+        })
+        
+    try:
+        response = model.generate_content(contents)
+        return response.text.strip()
+    except Exception as e:
+        return f"Error communicating with Gemini API: {str(e)}"

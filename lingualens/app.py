@@ -326,7 +326,7 @@ with st.sidebar:
 
 # ─── Main Content: Image Input ───────────────────────────────────────
 
-tab_upload, tab_camera, tab_text = st.tabs(["📁 Upload Image", "📷 Capture from Webcam", "✍️ Write Text Directly"])
+tab_upload, tab_camera, tab_text = st.tabs(["📁 Upload Image", "📷 Capture from Camera", "✍️ Write Text Directly"])
 
 input_image = None
 direct_text_input = ""
@@ -347,10 +347,10 @@ with tab_upload:
 
 with tab_camera:
     st.markdown('<div class="result-card" style="text-align: center;">', unsafe_allow_html=True)
-    st.markdown("<h3 style='margin-bottom: 0;'>📷 Webcam Capture</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-bottom: 0;'>📷 Camera Capture</h3>", unsafe_allow_html=True)
     st.markdown("<p style='color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;'>Enable your camera to take a photo directly.</p>", unsafe_allow_html=True)
     
-    enable_camera = st.toggle("Enable Webcam", value=False)
+    enable_camera = st.toggle("Enable Camera", value=False)
     
     if enable_camera:
         camera_photo = st.camera_input(
@@ -361,7 +361,7 @@ with tab_camera:
         if camera_photo is not None:
             input_image = Image.open(camera_photo)
     else:
-        st.info("💡 Tip: Click 'Enable Webcam' when you're ready to capture.")
+        st.info("💡 Tip: Click 'Enable Camera' when you're ready to capture.")
         
     st.markdown('</div>', unsafe_allow_html=True)
 
