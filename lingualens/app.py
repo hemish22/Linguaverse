@@ -49,20 +49,29 @@ st.markdown("""
        Text:       Dark Gray   #1F2937
     ───────────────────────────────────────────────── */
 
-    /* Hide Streamlit Toolbar and Footer */
-    [data-testid="stToolbar"] {display: none !important;}
+    /* Hide Streamlit Toolbar Action Elements and Footer */
+    [data-testid="stHeaderActionElements"] {display: none !important;}
     footer {display: none !important;}
     
-    /* Ensure Header is transparent but still holds the chevron */
+    /* Ensure the toolbar container is visible but transparent so it can hold the chevron */
+    [data-testid="stToolbar"] {
+        display: flex !important;
+        background: transparent !important;
+        visibility: visible !important;
+    }
+    
+    /* Ensure Header is transparent */
     header[data-testid="stHeader"] {
         background: transparent !important;
     }
     
-    /* Make sure the sidebar toggles are visible and have correct z-index */
-    [data-testid="stSidebarCollapsedControl"], [data-testid="collapsedControl"] {
+    /* Guarantee that the collapse/expand buttons remain visible and interactive */
+    [data-testid="stSidebarCollapseButton"], 
+    [data-testid="stExpandSidebarButton"],
+    [data-testid="collapsedControl"] {
         display: flex !important;
         visibility: visible !important;
-        z-index: 1000000 !important;
+        z-index: 1000001 !important;
         color: #FFFFFF !important;
     }
 
