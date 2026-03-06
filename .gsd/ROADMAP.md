@@ -147,3 +147,15 @@
 ### Phase 25: Streamlit Config Theme Update
 **Status**: ✅ Complete
 
+---
+
+### Phase 26: Enhanced File Uploader UI
+**Status**: ✅ Complete
+**Objective**: Enlarge file dropzone and inject helper text inside it.
+**Depends on**: Phase 24
+
+**Tasks**:
+- [x] Update Streamlit layout logic.
+
+**Verification**:
+- Verified UI render is robust.

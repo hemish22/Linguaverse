@@ -23,7 +23,7 @@ from utils import text_to_speech, LANGUAGE_MAP
 
 st.set_page_config(
     page_title="LinguaLens — AI Text Explainer",
-    page_icon="🔍",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -283,6 +283,39 @@ st.markdown("""
         display: inline-block; width: 18px; margin-right: 8px; vertical-align: middle;
     }
 
+    /* Enlarge the file uploader dropzone and add text */
+    [data-testid="stFileUploaderDropzone"] {
+        min-height: 250px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        border: 2px dashed rgba(255, 68, 0, 0.4) !important;
+        background: rgba(255, 68, 0, 0.02) !important;
+        transition: all 0.3s ease !important;
+    }
+    [data-testid="stFileUploaderDropzone"]:hover {
+        border-color: rgba(255, 68, 0, 0.8) !important;
+        background: rgba(255, 68, 0, 0.05) !important;
+    }
+    [data-testid="stFileUploaderDropzone"] section::before {
+        content: 'Provide an image or text to get started\\A\\A Upload an image, take a photo, or directly paste text you want explained\\A\\A Supported: forms, medicine labels, instructions, research papers';
+        white-space: pre-wrap;
+        display: block;
+        text-align: center;
+        color: #9CA3AF;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    [data-testid="stFileUploaderDropzone"] section::after {
+        content: ''; /* We're keeping the standard "Drag and drop" text by default, but this adds our custom blocks before it */
+    }
+    /* Hide native streamlit file uploader helper text to make room for our own */
+    [data-testid="stFileUploaderDropzone"] small {
+        display: none !important; 
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -307,7 +340,7 @@ if "analysis_language" not in st.session_state:
 
 st.markdown("""
 <div class="main-header">
-    <h1>🔍 LinguaLens</h1>
+    <h1>LinguaLens</h1>
     <p>Upload a document → Get explanations in your language → Ask questions by text or voice</p>
 </div>
 """, unsafe_allow_html=True)
@@ -321,7 +354,7 @@ with st.sidebar:
 
     # Language selection
     target_language = st.selectbox(
-        "🌐 Output Language",
+        "Output Language",
         options=["English", "Hindi", "Tamil"],
         index=1,  # Default to Hindi
         help="Select the language for the translated explanation",
@@ -331,7 +364,7 @@ with st.sidebar:
     
     # Target Audience
     difficulty = st.selectbox(
-        "🧠 Explain For",
+        "Explain For",
         options=["Child (12 years old)", "Student", "Professional"],
         index=1,
         help="Adjust the simplicity and reading level of the explanation",
@@ -341,31 +374,31 @@ with st.sidebar:
     
     # Input Language Selection (to fix EasyOCR incompatibility)
     source_language = st.selectbox(
-        "📸 Image Text Language",
+        "Image Text Language",
         options=["English & Hindi", "English & Tamil"],
         index=0,
         help="Select which language is present in the image. EasyOCR cannot load Hindi and Tamil simultaneously.",
     )
 
     st.markdown("---")
-    st.markdown("## 📖 How it works")
+    st.markdown("## How it works")
     st.markdown("""
     1. **Upload** an image with text
     2. **OCR** extracts the text automatically
     3. **AI** simplifies and explains it
     4. **Translation** in your chosen language
     5. **Listen** to the explanation (optional)
-    6. **Ask questions** about the document 💬
+    6. **Ask questions** about the document 
     """)
 
     st.markdown("---")
-    st.markdown("## 🎯 Works great with")
+    st.markdown("## Works great with")
     st.markdown("""
-    - 💊 Medicine labels
-    - 📄 Government documents
-    - 🚏 Signboards
-    - 📋 Instructions & manuals
-    - 📑 Research papers
+    - Medicine labels
+    - Government documents
+    - Signboards
+    - Instructions & manuals
+    - Research papers
     """)
 
 
@@ -382,7 +415,6 @@ with tab_upload:
         type=["jpg", "jpeg", "png", "webp"],
         label_visibility="collapsed"
     )
-    st.markdown("<p style='color:#64748b; font-size: 0.95rem; text-align: center;'>Supported: forms, medicine labels, instructions, research papers</p>", unsafe_allow_html=True)
     
     if uploaded_file is not None:
         input_image = Image.open(uploaded_file)
@@ -412,7 +444,7 @@ with tab_camera:
 
 with tab_text:
     st.markdown('<div class="result-card">', unsafe_allow_html=True)
-    st.markdown("<h3 style='margin-bottom: 0;'>✍️ Write or Paste Text</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-bottom: 0;'>Write or Paste Text</h3>", unsafe_allow_html=True)
     st.markdown("<p style='color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;'>Paste standard text here to bypass OCR extraction.</p>", unsafe_allow_html=True)
     
     text_input_area = st.text_area(
@@ -431,24 +463,24 @@ with tab_text:
 # ─── Processing ──────────────────────────────────────────────────────
 
 if input_image is not None or direct_text_input:
-    button_label = "🔍 Analyze Text" if direct_text_input else "🔍 Analyze Image"
+    button_label = "Analyze Text" if direct_text_input else "Analyze Image"
     if st.button(button_label, use_container_width=True, type="primary"):
         # Clear previous Q&A history for new analysis
         st.session_state.chat_history = []
 
         # Step 1: Text Retrieval (OCR or Direct)
-        with st.status("🔄 Processing your input...", expanded=True) as status:
+        with st.status("Processing your input...", expanded=True) as status:
             if direct_text_input:
-                st.write("📝 Using directly inputted text...")
+                st.write("Using directly inputted text...")
                 extracted_text = direct_text_input
                 ocr_confidence = 1.0
             else:
-                st.write("📸 Extracting text from image...")
+                st.write("Extracting text from image...")
                 extracted_text, ocr_confidence = extract_text(input_image, source_language)
 
             if not extracted_text.strip():
                 status.update(
-                    label="⚠️ No text detected or provided",
+                    label="No text detected or provided",
                     state="error",
                     expanded=True,
                 )
@@ -458,13 +490,13 @@ if input_image is not None or direct_text_input:
                 )
                 st.session_state.analysis_result = None
             else:
-                st.write(f"✅ Found {len(extracted_text.split())} words")
+                st.write(f"Found {len(extracted_text.split())} words")
 
                 # Step 2: LLM Processing
-                st.write("🧠 AI is simplifying and translating...")
+                st.write("AI is simplifying and translating...")
                 result = simplify_and_translate(extracted_text, target_language, difficulty)
 
-                st.write("💡 Generating suggested questions...")
+                st.write("Generating suggested questions...")
                 suggested = generate_suggested_questions(extracted_text, target_language)
 
                 # Save everything to session state for persistent display
@@ -475,7 +507,7 @@ if input_image is not None or direct_text_input:
                 st.session_state.analysis_language = target_language
 
                 status.update(
-                    label="✅ Analysis complete!",
+                    label="Analysis complete!",
                     state="complete",
                     expanded=False,
                 )
@@ -500,7 +532,7 @@ if st.session_state.get("analysis_result"):
     # Extracted Text
     st.markdown("""
     <div class="result-card">
-        <h3>📝 Extracted Text</h3>
+        <h3>Extracted Text</h3>
     </div>
     """, unsafe_allow_html=True)
     st.code(extracted_text, language=None)
@@ -519,12 +551,12 @@ if st.session_state.get("analysis_result"):
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Text-to-Speech
-    st.markdown("### 🔊 Listen")
+    st.markdown("###Listen")
     
     if content_to_show:
         with st.spinner("Generating Audio Summary..."):
             try:
-                st.write("**▶️ Audio Explanation**")
+                st.write("**▶Audio Explanation**")
                 # Remove markdown tokens that might sound weird in TTS
                 tts_clean_text = content_to_show.replace("*", "").replace("#", "").replace("📄", "").replace("💡", "").replace("📝", "").replace("⚠️", "")
                 audio_bytes = text_to_speech(tts_clean_text, target_language)
@@ -537,19 +569,19 @@ if st.session_state.get("analysis_result"):
     st.markdown("---")
     st.markdown("""
     <div class="qa-header">
-        <h3>💬 Ask Questions About This Document</h3>
+        <h3>Ask Questions About This Document</h3>
         <p>Ask in any language — type or speak your question</p>
     </div>
     """, unsafe_allow_html=True)
 
     # Suggested questions
     if st.session_state.get("suggested_questions"):
-        st.markdown("**💡 Suggested questions:**")
+        st.markdown("**Suggested questions:**")
         sq_cols = st.columns(min(3, len(st.session_state.suggested_questions)))
         for i, sq in enumerate(st.session_state.suggested_questions):
             with sq_cols[i % 3]:
                 if st.button(sq, key=f"sq_{i}", use_container_width=True):
-                    with st.spinner("🤔 Thinking..."):
+                    with st.spinner("Thinking..."):
                         sq_answer = answer_question(
                             st.session_state.ocr_text,
                             target_language,
@@ -566,10 +598,10 @@ if st.session_state.get("analysis_result"):
             placeholder="e.g., What documents are required? / इस फॉर्म में क्या भरना है? / இதில் என்ன நிரப்ப வேண்டும்?",
             label_visibility="collapsed",
         )
-        ask_submitted = st.form_submit_button("💬 Ask Question", use_container_width=True)
+        ask_submitted = st.form_submit_button("Ask Question", use_container_width=True)
 
     if ask_submitted and user_question.strip():
-        with st.spinner("🤔 Thinking..."):
+        with st.spinner("Thinking..."):
             text_answer = answer_question(
                 st.session_state.ocr_text,
                 target_language,
@@ -593,10 +625,10 @@ if st.session_state.get("analysis_result"):
         )
     with voice_col2:
         st.markdown("<br>", unsafe_allow_html=True)
-        send_voice = st.button("📤 Send", key="send_voice_btn", use_container_width=True)
+        send_voice = st.button("Send", key="send_voice_btn", use_container_width=True)
 
     if send_voice and voice_audio is not None:
-        with st.spinner("🎧 Listening and thinking..."):
+        with st.spinner("Listening and thinking..."):
             audio_data = voice_audio.read()
             voice_answer = answer_question(
                 st.session_state.ocr_text,
@@ -609,7 +641,7 @@ if st.session_state.get("analysis_result"):
 
     # Display conversation history
     if st.session_state.get("chat_history"):
-        st.markdown("### 📜 Conversation History")
+        st.markdown("### Conversation History")
         for idx, msg in enumerate(st.session_state.chat_history):
             with st.chat_message("user" if msg["role"] == "user" else "assistant"):
                 st.markdown(msg["content"])
@@ -621,16 +653,7 @@ if st.session_state.get("analysis_result"):
                         pass
 
 
-# ─── Empty State ──────────────────────────────────────────────────────
 
-elif not (input_image is not None or direct_text_input):
-    st.markdown("""
-    <div style="text-align: center; padding: 4rem 2rem; color: #9CA3AF;">
-        <p style="font-size: 4rem; margin-bottom: 1rem;">📸 / ✍️</p>
-        <h3 style="color: #2563EB; font-weight: 500;">Provide an image or text to get started</h3>
-        <p style="color: #9CA3AF;">Upload an image, take a photo, or directly paste text you want explained</p>
-    </div>
-    """, unsafe_allow_html=True)
 
 
 # ─── Footer ──────────────────────────────────────────────────────────
