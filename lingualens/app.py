@@ -52,9 +52,20 @@ st.markdown("""
     /* Hide Streamlit Default UI but keep sidebar toggle */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    [data-testid="stToolbar"] {visibility: hidden;}
-    [data-testid="stDecoration"] {visibility: hidden;}
+    [data-testid="stToolbar"] {visibility: hidden; display: none;}
+    [data-testid="stDecoration"] {visibility: hidden; display: none;}
     [data-testid="manage-app-button"] {display: none;}
+    
+    /* Ensure the sidebar toggle stays visible on top of everything */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+    }
+    
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
 
     /* Global font */
     html, body, [class*="css"] {
