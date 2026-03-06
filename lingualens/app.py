@@ -89,7 +89,7 @@ st.markdown("""
 
     /* Main header styling - Liquid Glass */
     .main-header {
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.85) 0%, rgba(20, 184, 166, 0.85) 100%) !important;
+        background: linear-gradient(135deg, rgba(19, 78, 142, 0.9) 0%, rgba(192, 7, 7, 0.9) 100%) !important;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         padding: 2.5rem 2rem;
@@ -97,7 +97,7 @@ st.markdown("""
         margin-bottom: 2.5rem;
         text-align: center;
         border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 10px 40px rgba(30, 58, 138, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 40px rgba(19, 78, 142, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
         position: relative;
         overflow: hidden;
     }
@@ -108,7 +108,7 @@ st.markdown("""
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
         opacity: 0.5;
         pointer-events: none;
     }
@@ -118,7 +118,7 @@ st.markdown("""
         font-weight: 700;
         margin: 0;
         letter-spacing: -1px;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
     .main-header p {
         color: rgba(255, 255, 255, 0.95);
@@ -133,7 +133,7 @@ st.markdown("""
         background: #E5E7EB !important;
         color: #0B0F19 !important; /* Dark text on light card */
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-left: 4px solid #2563EB;
+        border-left: 4px solid #134E8E;
         border-radius: 16px;
         padding: 1.75rem;
         margin-bottom: 1.5rem;
@@ -144,33 +144,31 @@ st.markdown("""
     }
     .result-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.2);
+        box-shadow: 0 12px 32px rgba(19, 78, 142, 0.2);
         background: #f3f4f6 !important;
     }
     .result-card h3 {
-        color: #2563EB !important;
+        color: #134E8E !important;
         font-weight: 700;
         margin-bottom: 1rem;
         font-size: 1.25rem;
         letter-spacing: -0.3px;
     }
 
-
-
     /* Uploaded image container — constrained size with fluid styling */
     .image-container {
-        border: 2px dashed rgba(20, 184, 166, 0.4);
+        border: 2px dashed rgba(255, 68, 0, 0.4);
         border-radius: 16px;
         padding: 1rem;
         text-align: center;
-        background: rgba(20, 184, 166, 0.02);
+        background: rgba(255, 68, 0, 0.02);
         max-width: 400px;
         margin: 0 auto;
         transition: all 300ms ease;
     }
     .image-container:hover {
-        border-color: rgba(20, 184, 166, 0.8);
-        background: rgba(20, 184, 166, 0.05);
+        border-color: rgba(255, 68, 0, 0.8);
+        background: rgba(255, 68, 0, 0.05);
     }
     .image-container img {
         max-height: 300px;
@@ -191,9 +189,9 @@ st.markdown("""
         border-radius: 8px;
     }
 
-    /* Button styling - Amber Highlight */
+    /* Button styling - Amber/Orange Highlight */
     .stButton > button {
-        background: linear-gradient(135deg, #F59E0B 0%, #d97706 100%) !important;
+        background: linear-gradient(135deg, #FFB33F 0%, #FF4400 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 10px;
@@ -203,7 +201,7 @@ st.markdown("""
         letter-spacing: 0.3px;
         transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer !important;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        box-shadow: 0 4px 12px rgba(255, 68, 0, 0.3);
         position: relative;
         overflow: hidden;
     }
@@ -217,14 +215,14 @@ st.markdown("""
     }
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+        box-shadow: 0 8px 20px rgba(255, 68, 0, 0.5);
     }
     .stButton > button:hover::after {
         opacity: 1;
     }
     .stButton > button:active {
         transform: translateY(0);
-        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        box-shadow: 0 2px 8px rgba(255, 68, 0, 0.3);
     }
 
     /* Interactive Elements Cursor */
@@ -235,21 +233,21 @@ st.markdown("""
 
     /* Accent highlight for important elements */
     .accent-highlight {
-        color: #F59E0B;
+        color: #FF4400;
         font-weight: 600;
     }
 
     /* Q&A Section Header */
     .qa-header {
-        background: linear-gradient(135deg, rgba(20, 184, 166, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%);
-        border: 1px solid rgba(20, 184, 166, 0.3);
-        border-left: 4px solid #14B8A6;
+        background: linear-gradient(135deg, rgba(255, 68, 0, 0.12) 0%, rgba(19, 78, 142, 0.08) 100%);
+        border: 1px solid rgba(255, 68, 0, 0.3);
+        border-left: 4px solid #FF4400;
         border-radius: 16px;
         padding: 1.75rem;
         margin-bottom: 1.5rem;
     }
     .qa-header h3 {
-        color: #14B8A6 !important;
+        color: #FF4400 !important;
         font-weight: 700;
         margin-bottom: 0.5rem;
         font-size: 1.25rem;
