@@ -59,14 +59,20 @@ Format your response EXACTLY like this (use these exact headers):
 [Language name]
 
 ## Key Points
-- [Single-liner actionable point 1]
-- [Single-liner actionable point 2]
-- [Single-liner actionable point 3]
+
+* [Single-liner actionable point 1]
+
+* [Single-liner actionable point 2]
+
+* [Single-liner actionable point 3]
 
 ## Translated Key Points ({target_language})
-- [Translated point 1]
-- [Translated point 2]
-- [Translated point 3]
+
+* [Translated point 1]
+
+* [Translated point 2]
+
+* [Translated point 3]
 
 ## Detailed Explanation
 [Your simple explanation tailored for a {difficulty}]

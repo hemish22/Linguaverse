@@ -1,11 +1,10 @@
 ## Current Position
-- **Phase**: 17 (Redesigning Explanations & Key Points UI)
+- **Phase**: 18 (Layout Streamlining & Language Localization)
 - **Task**: All tasks complete
 - **Status**: Verified
 
 ## Last Session Summary
-Phase 17 executed successfully. Modified the `llm_module.py` prompts to enforce concise, actionable 1-liner key points. Updated the Streamlit UI to dynamically parse and display Key Points first and in both Original and Translated languages. Injected `.small-text` typography for readability. Refactored the Text-To-Speech generator to render audio sequentially (Fast Key Points first, then Detailed Explanation in the background spinner) to dramatically improve Next-Paint interaction latency.
+Phase 18 executed successfully. Conditionally stripped `col_left` from rendering if a translated language is active, forcing a clean, single-column focused interface. Scrapped `st.code()` code blocks across all response containers to remove duplicate rendering clunkiness. Squashed the Text-to-Speech player interface down to standard markdown headlines. Rewrote the `_build_prompt` format mapping from `-` items to double-spaced `*` paragraphs, fixing a bug where Streamlit's native markdown renderer was clumping actionable key points into solid text walls. Code pushed to `main`.
 
 ## Next Steps
-- Await Mentor/User validation
-- Move to next phase if available
+- Await Hackathon Demo / user validation

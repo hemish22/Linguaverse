@@ -492,65 +492,50 @@ if st.session_state.get("analysis_result"):
     """, unsafe_allow_html=True)
     st.code(extracted_text, language=None)
 
-    # Two-column layout for explanation and translation
-    col_left, col_right = st.columns(2)
-
-    with col_left:
-        # Toggleable Tabs for Key Points and Detailed Explanation
+    # Dynamic single-column layout based on target language
+    # Toggleable Tabs for Key Points and Detailed Explanation
+    if target_language == "English":
         key_tab, exp_tab = st.tabs(["🎯 Key Points", "📖 Detailed Explanation"])
-
         with key_tab:
             if result.get("key_points"):
                 st.markdown(f'<div class="small-text">{result["key_points"]}</div>', unsafe_allow_html=True)
-                st.code(result["key_points"], language=None)
             else:
                 st.info("No key points generated.")
-
         with exp_tab:
             st.markdown(f'<div class="small-text">{result["explanation"]}</div>', unsafe_allow_html=True)
-            st.code(result["explanation"], language=None)
-
-    with col_right:
-        # Translation Tabs
+    else:
+        # If translated, ONLY show the translated tabs to prevent clutter
         trans_key_tab, trans_exp_tab = st.tabs([f"🎯 Translated Key Points ({target_language})", f"📖 Translated Explanation ({target_language})"])
-
         with trans_key_tab:
             if result.get("translated_key_points"):
                 st.markdown(f'<div class="small-text">{result["translated_key_points"]}</div>', unsafe_allow_html=True)
-                st.code(result["translated_key_points"], language=None)
             else:
                 st.info("No translated key points generated.")
-
         with trans_exp_tab:
             st.markdown(f'<div class="small-text">{result["translation"]}</div>', unsafe_allow_html=True)
-            st.code(result["translation"], language=None)
 
-        # Text-to-Speech
-        st.markdown("""
-        <div class="result-card">
-            <h3>🔊 Listen</h3>
-        </div>
-        """, unsafe_allow_html=True)
+    # Text-to-Speech
+    st.markdown("### 🔊 Listen")
 
-        tts_text_short = result.get("translated_key_points") or result.get("key_points", "")
-        tts_text_long = result.get("translation") or result.get("explanation", "")
+    tts_text_short = result.get("translated_key_points") if target_language != "English" else result.get("key_points", "")
+    tts_text_long = result.get("translation") if target_language != "English" else result.get("explanation", "")
 
-        if tts_text_short:
+    if tts_text_short:
+        try:
+            st.write("**▶️ Key Points Audio (Fast)**")
+            audio_bytes_short = text_to_speech(tts_text_short, target_language)
+            st.audio(audio_bytes_short, format="audio/mp3")
+        except Exception as e:
+            st.warning(f"Key Points TTS unavailable: {str(e)}")
+
+    if tts_text_long:
+        with st.spinner("Generating Detailed Explanation Audio..."):
             try:
-                st.write("**▶️ Key Points Audio (Fast)**")
-                audio_bytes_short = text_to_speech(tts_text_short, target_language)
-                st.audio(audio_bytes_short, format="audio/mp3")
+                st.write("**▶️ Detailed Explanation Audio**")
+                audio_bytes_long = text_to_speech(tts_text_long, target_language)
+                st.audio(audio_bytes_long, format="audio/mp3")
             except Exception as e:
-                st.warning(f"Key Points TTS unavailable: {str(e)}")
-
-        if tts_text_long:
-            with st.spinner("Generating Detailed Explanation Audio..."):
-                try:
-                    st.write("**▶️ Detailed Explanation Audio**")
-                    audio_bytes_long = text_to_speech(tts_text_long, target_language)
-                    st.audio(audio_bytes_long, format="audio/mp3")
-                except Exception as e:
-                    st.warning(f"Detailed Explanation TTS unavailable: {str(e)}")
+                st.warning(f"Detailed Explanation TTS unavailable: {str(e)}")
 
     # ─── Document Q&A Section ────────────────────────────────────────
 

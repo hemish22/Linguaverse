@@ -1,3 +1,6 @@
+### Phase 18: Layout Streamlining & Language Localization
+**Status**: ✅ Complete
+
 # LinguaLens Roadmap
 
 ### Phase 17: Redesigning Explanations & Key Points UI
@@ -14,3 +17,15 @@
 **Verification**:
 - [x] App runs without error
 - [x] All 4 UI changes visible and reactive
+---
+
+### Phase 18: Layout Streamlining & Language Localization
+**Status**: ⬜ Not Started
+**Objective**: Clean up repetitive text (code blocks vs markdown), enforce newline rendering for LLM points, strip original language if translated language is selected, and shrink the audio player UI.
+**Depends on**: Phase 17
+
+**Tasks**:
+- [ ] TBD (run /plan 18 to create)
+
+**Verification**:
+- TBD
