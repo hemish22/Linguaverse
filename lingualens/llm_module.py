@@ -48,27 +48,30 @@ government document, signboard, instruction manual, research paper, or similar).
 
 Your task:
 1. **Detected Language**: Identify the primary language(s) of the original text.
-2. **AI Simplified Explanation**: Rewrite the text tailored for a {difficulty}. Avoid jargon and technical terms. If the text contains medical, legal, or technical content, explain what it means in practical terms for a {difficulty}.
-3. **Key Points**: List 3-5 important takeaways using this format:
-   - What this document is: [description]
-   - Information required/present: [details]
-   - Actions to take: [actions]
-4. **Translation**: Translate your simplified explanation into {target_language}. Make sure the translation is natural and easy to read.
+2. **Key Points**: List 3-5 short, single-liner, actionable takeaways. If this is a form or document, state exactly what must be done and what is important. Do NOT use paragraphs.
+3. **Translated Key Points**: Translate these short key points into {target_language}.
+4. **Detailed Explanation**: Rewrite the text tailored for a {difficulty}. Avoid jargon and technical terms. If the text contains medical, legal, or technical content, explain what it means in practical terms for a {difficulty}.
+5. **Translated Explanation**: Translate your detailed explanation into {target_language}. Make sure the translation is natural and easy to read.
 
 Format your response EXACTLY like this (use these exact headers):
 
 ## Detected Language
 [Language name]
 
-## AI Simplified Explanation
+## Key Points
+- [Single-liner actionable point 1]
+- [Single-liner actionable point 2]
+- [Single-liner actionable point 3]
+
+## Translated Key Points ({target_language})
+- [Translated point 1]
+- [Translated point 2]
+- [Translated point 3]
+
+## Detailed Explanation
 [Your simple explanation tailored for a {difficulty}]
 
-## Key Points
-- What this document is: [description]
-- Information present: [details]
-- Actions to take: [actions]
-
-## Translation ({target_language})
+## Translated Explanation ({target_language})
 [Your translated explanation here]
 
 ---
@@ -93,16 +96,18 @@ def simplify_and_translate(text: str, target_language: str = "Hindi", difficulty
     Returns:
         Dictionary with keys:
         - 'detected_language': Guessed language of original text
-        - 'explanation': Simple explanation of the text
         - 'key_points': Key points as a string
-        - 'translation': Translated explanation
+        - 'translated_key_points': Translated key points
+        - 'explanation': Detailed simple explanation of the text
+        - 'translation': Translated detailed explanation
         - 'full_response': Complete raw response from the LLM
     """
     if not text or not text.strip():
         return {
             "detected_language": "Unknown",
-            "explanation": "No text was provided to analyze.",
             "key_points": "",
+            "translated_key_points": "",
+            "explanation": "No text was provided to analyze.",
             "translation": "",
             "full_response": "",
         }
@@ -123,8 +128,9 @@ def simplify_and_translate(text: str, target_language: str = "Hindi", difficulty
         error_msg = f"Error communicating with Gemini API: {str(e)}"
         return {
             "detected_language": "Unknown",
-            "explanation": error_msg,
             "key_points": "",
+            "translated_key_points": "",
+            "explanation": error_msg,
             "translation": "",
             "full_response": error_msg,
         }
@@ -135,12 +141,14 @@ def _parse_response(response_text: str, target_language: str) -> dict:
     
     # Use regex to robustly parse sections regardless of spacing
     detected_lang_match = re.search(r'## Detected Language\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
-    explanation_match = re.search(r'## (?:(?:AI )?Simplified Explanation|Simple Explanation)\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
     key_points_match = re.search(r'## Key Points\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
-    translation_match = re.search(r'## Translation.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    translated_kp_match = re.search(r'## Translated Key Points.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    explanation_match = re.search(r'## Detailed Explanation\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    translation_match = re.search(r'## Translated Explanation.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
 
-    explanation = explanation_match.group(1).strip() if (explanation_match and explanation_match.group(1)) else ""
     key_points = key_points_match.group(1).strip() if (key_points_match and key_points_match.group(1)) else ""
+    translated_key_points = translated_kp_match.group(1).strip() if (translated_kp_match and translated_kp_match.group(1)) else ""
+    explanation = explanation_match.group(1).strip() if (explanation_match and explanation_match.group(1)) else ""
     translation = translation_match.group(1).strip() if (translation_match and translation_match.group(1)) else ""
     detected_lang = detected_lang_match.group(1).strip() if (detected_lang_match and detected_lang_match.group(1)) else "Unknown"
 
@@ -149,8 +157,9 @@ def _parse_response(response_text: str, target_language: str) -> dict:
         
     return {
         "detected_language": detected_lang,
-        "explanation": explanation,
         "key_points": key_points,
+        "translated_key_points": translated_key_points,
+        "explanation": explanation,
         "translation": translation,
     }
 

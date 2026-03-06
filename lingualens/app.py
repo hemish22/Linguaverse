@@ -75,6 +75,12 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
+    /* Small text for explanations */
+    .small-text, .small-text p, .small-text li {
+        font-size: 0.9rem !important;
+        line-height: 1.5 !important;
+    }
+
     /* Global font */
     html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif !important;
@@ -490,29 +496,34 @@ if st.session_state.get("analysis_result"):
     col_left, col_right = st.columns(2)
 
     with col_left:
-        # Toggleable Tabs for Explanation and Key Points
-        exp_tab, key_tab = st.tabs(["💡 AI Simplified Explanation", "🎯 Key Points"])
-
-        with exp_tab:
-            st.markdown(result["explanation"])
-            st.code(result["explanation"], language=None)
+        # Toggleable Tabs for Key Points and Detailed Explanation
+        key_tab, exp_tab = st.tabs(["🎯 Key Points", "📖 Detailed Explanation"])
 
         with key_tab:
-            if result["key_points"]:
-                st.markdown(result["key_points"])
+            if result.get("key_points"):
+                st.markdown(f'<div class="small-text">{result["key_points"]}</div>', unsafe_allow_html=True)
                 st.code(result["key_points"], language=None)
             else:
                 st.info("No key points generated.")
 
+        with exp_tab:
+            st.markdown(f'<div class="small-text">{result["explanation"]}</div>', unsafe_allow_html=True)
+            st.code(result["explanation"], language=None)
+
     with col_right:
-        # Translation
-        st.markdown(f"""
-        <div class="result-card">
-            <h3>🌐 Translation ({target_language})</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown(result["translation"])
-        st.code(result["translation"], language=None)
+        # Translation Tabs
+        trans_key_tab, trans_exp_tab = st.tabs([f"🎯 Translated Key Points ({target_language})", f"📖 Translated Explanation ({target_language})"])
+
+        with trans_key_tab:
+            if result.get("translated_key_points"):
+                st.markdown(f'<div class="small-text">{result["translated_key_points"]}</div>', unsafe_allow_html=True)
+                st.code(result["translated_key_points"], language=None)
+            else:
+                st.info("No translated key points generated.")
+
+        with trans_exp_tab:
+            st.markdown(f'<div class="small-text">{result["translation"]}</div>', unsafe_allow_html=True)
+            st.code(result["translation"], language=None)
 
         # Text-to-Speech
         st.markdown("""
@@ -521,13 +532,25 @@ if st.session_state.get("analysis_result"):
         </div>
         """, unsafe_allow_html=True)
 
-        tts_text = result["translation"] if result["translation"] else result["explanation"]
+        tts_text_short = result.get("translated_key_points") or result.get("key_points", "")
+        tts_text_long = result.get("translation") or result.get("explanation", "")
 
-        try:
-            audio_bytes = text_to_speech(tts_text, target_language)
-            st.audio(audio_bytes, format="audio/mp3")
-        except Exception as e:
-            st.warning(f"Text-to-speech unavailable: {str(e)}")
+        if tts_text_short:
+            try:
+                st.write("**▶️ Key Points Audio (Fast)**")
+                audio_bytes_short = text_to_speech(tts_text_short, target_language)
+                st.audio(audio_bytes_short, format="audio/mp3")
+            except Exception as e:
+                st.warning(f"Key Points TTS unavailable: {str(e)}")
+
+        if tts_text_long:
+            with st.spinner("Generating Detailed Explanation Audio..."):
+                try:
+                    st.write("**▶️ Detailed Explanation Audio**")
+                    audio_bytes_long = text_to_speech(tts_text_long, target_language)
+                    st.audio(audio_bytes_long, format="audio/mp3")
+                except Exception as e:
+                    st.warning(f"Detailed Explanation TTS unavailable: {str(e)}")
 
     # ─── Document Q&A Section ────────────────────────────────────────
 
