@@ -49,6 +49,15 @@ st.markdown("""
        Text:       Dark Gray   #1F2937
     ───────────────────────────────────────────────── */
 
+    /* Hide Streamlit Default UI */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    .stApp > header {visibility: hidden;}
+    [data-testid="stToolbar"] {visibility: hidden;}
+    [data-testid="stDecoration"] {visibility: hidden;}
+    [data-testid="manage-app-button"] {display: none;}
+
     /* Global font */
     html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif !important;
