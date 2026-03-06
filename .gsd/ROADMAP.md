@@ -131,3 +131,19 @@
 
 **Verification**:
 - TBD
+---
+
+### Phase 25: Streamlit Config Theme Update
+**Status**: ⬜ Not Started
+**Objective**: Update the global Streamlit  to remove the default dark blue background tint and apply the brand's primary color properly to the framework.
+**Depends on**: Phase 24
+
+**Tasks**:
+- [ ] Update config.toml theme colors.
+
+**Verification**:
+- Reload app and verify global page background.
+
+### Phase 25: Streamlit Config Theme Update
+**Status**: ✅ Complete
+

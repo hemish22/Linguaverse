@@ -3,8 +3,8 @@ toolbarMode = "minimal"
 showSidebarNavigation = false
 
 [theme]
-primaryColor="#2563EB"
-backgroundColor="#0B0F19"
-secondaryBackgroundColor="#111827"
+primaryColor="#FF4400"
+backgroundColor="#0A0B0E"
+secondaryBackgroundColor="#121418"
 textColor="#FFFFFF"
 font="sans serif"
