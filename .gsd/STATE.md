@@ -1,10 +1,10 @@
 ## Current Position
-- **Phase**: 26 (Enhanced File Uploader UI)
+- **Phase**: 26.5 (Streamlit Dropzone Layout Refinement)
 - **Task**: All tasks complete
 - **Status**: Verified
 
 ## Last Session Summary
-Phase 26 executed successfully in response to user feedack. The global empty state `div` container at the bottom of the app was deleted entirely. Instead, targeted CSS overrides were written to enlarge the standard Streamlit `st.file_uploader` dropzone (`[data-testid="stFileUploaderDropzone"]`) to `250px` minimum height, centering its flex contents. The instructional text was then seamlessly injected directly inside this dropzone using a `::before` pseudo-element with newline (`\A`) characters, creating a large, unified hero area for document upload without redundant text blocks. Code pushed to `main`.
+Phase 26.5 executed successfully to fix a UI layout bug caused by the previous Streamlit hack. The injected hero text in the file dropzone was pushing down the 'Browse files' button, causing it to fall below the 'Drag and drop' text. By targeting the inner `section` element of `[data-testid="stFileUploaderDropzone"]` and forcing `display: flex; flex-direction: row; align-items: center; justify-content: center;`, the 'Browse files' button now aligns perfectly to the right of the drag-and-drop icon/text group. Additionally, the injected hero text was moved to the parent container's `::before` element to span the full width comfortably above the row. Code pushed to `main`.
 
 ## Next Steps
 - Await Hackathon Demo / user validation

@@ -159,3 +159,20 @@
 
 **Verification**:
 - Verified UI render is robust.
+---
+
+### Phase 26.5: Streamlit Dropzone Refinement
+**Status**: ⬜ Not Started
+**Objective**: Fix the internal layout of the enlarged file dropzone to properly hold the injected hero text and align the 'Browse files' button correctly.
+**Depends on**: Phase 26
+
+**Tasks**:
+- [ ] Fix CSS flexbox directions in app.py.
+
+**Verification**:
+- TBD
+---
+
+### Phase 26.5: Streamlit Dropzone Refinement
+**Status**: ✅ Complete
+

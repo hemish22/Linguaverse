@@ -289,29 +289,41 @@ st.markdown("""
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
-        align-items: center !important;
         border: 2px dashed rgba(255, 68, 0, 0.4) !important;
         background: rgba(255, 68, 0, 0.02) !important;
         transition: all 0.3s ease !important;
+        padding: 2rem !important;
     }
     [data-testid="stFileUploaderDropzone"]:hover {
         border-color: rgba(255, 68, 0, 0.8) !important;
         background: rgba(255, 68, 0, 0.05) !important;
     }
-    [data-testid="stFileUploaderDropzone"] section::before {
-        content: 'Provide an image or text to get started\\A\\A Upload an image, take a photo, or directly paste text you want explained\\A\\A Supported: forms, medicine labels, instructions, research papers';
+    
+    /* Inject the hero text at the top of the dropzone */
+    [data-testid="stFileUploaderDropzone"]::before {
+        content: 'Provide an image or text to get started\\A\\A Upload an image, take a photo, or directly paste text you want explained';
         white-space: pre-wrap;
         display: block;
         text-align: center;
         color: #9CA3AF;
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-        line-height: 1.5;
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        font-weight: 500;
+        line-height: 1.6;
+        width: 100%;
     }
-    [data-testid="stFileUploaderDropzone"] section::after {
-        content: ''; /* We're keeping the standard "Drag and drop" text by default, but this adds our custom blocks before it */
+
+    /* Force the inner section (icon + text + button) into a row */
+    [data-testid="stFileUploaderDropzone"] section {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 1.5rem !important;
+        width: 100% !important;
     }
-    /* Hide native streamlit file uploader helper text to make room for our own */
+    
+    /* Hide native streamlit file uploader helper text like the 200MB limit */
     [data-testid="stFileUploaderDropzone"] small {
         display: none !important; 
     }
