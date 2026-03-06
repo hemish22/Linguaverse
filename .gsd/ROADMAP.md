@@ -1,3 +1,6 @@
+### Phase 21: Numbered List Strict Parsing
+**Status**: ✅ Complete
+
 ### Phase 20: Typography Optimization & Regex Tuning
 **Status**: ✅ Complete
 
@@ -68,6 +71,18 @@
 
 **Tasks**:
 - [ ] TBD (run /plan 20 to create)
+
+**Verification**:
+- TBD
+---
+
+### Phase 21: Numbered List Strict Parsing
+**Status**: ⬜ Not Started
+**Objective**: Force the LLM's inline generated numbered lists to render on separate lines using a targeted regex that avoids mid-sentence character breaks.
+**Depends on**: Phase 20
+
+**Tasks**:
+- [ ] TBD (run /plan 21 to create)
 
 **Verification**:
 - TBD

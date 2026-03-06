@@ -151,6 +151,12 @@ def _parse_response(response_text: str, target_language: str) -> dict:
     key_points = key_points_match.group(1).strip() if (key_points_match and key_points_match.group(1)) else ""
     translated_key_points = translated_kp_match.group(1).strip() if (translated_kp_match and translated_kp_match.group(1)) else ""
 
+    # Extremely specific parsing to force the LLM's inline "1. Point 2. Point" structure onto newlines.
+    # We look behind to ensure we are not at the start of string `(?<!^)`. 
+    # We look ahead for a word boundary, digits, a literal period, and a space `(?=\b\d+\.\s)`
+    key_points = re.sub(r'(?<!^)(?=\b\d+\.\s)', '\n\n', key_points)
+    translated_key_points = re.sub(r'(?<!^)(?=\b\d+\.\s)', '\n\n', translated_key_points)
+
     explanation = explanation_match.group(1).strip() if (explanation_match and explanation_match.group(1)) else ""
     translation = translation_match.group(1).strip() if (translation_match and translation_match.group(1)) else ""
     detected_lang = detected_lang_match.group(1).strip() if (detected_lang_match and detected_lang_match.group(1)) else "Unknown"

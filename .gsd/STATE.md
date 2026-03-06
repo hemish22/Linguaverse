@@ -1,10 +1,10 @@
 ## Current Position
-- **Phase**: 20 (Typography Optimization & Regex Tuning)
+- **Phase**: 21 (Numbered List Strict Parsing)
 - **Task**: All tasks complete
 - **Status**: Verified
 
 ## Last Session Summary
-Phase 20 executed successfully. The CSS `app.py` properties for `.small-text` were adjusted from `0.9rem` up to `1.15rem` with a `line-height` of `1.6` for substantially improved readability of long translations, especially in Hindi or Tamil scripts. In `llm_module.py`, the aggressive bullet-point formatter regex was deleted. To retain bullet formatting without breaking midway text asterisks, the system prompt was refactored to require explicit Numbered Lists (`1. \n 2. `) instead of generic bullet characters, leaning on Streamlit's native backend markdown list parser to structure the UI key points safely and reliably. Code pushed to `main`.
+Phase 21 executed successfully. Re-introduced a targeted Python `re.sub` into `llm_module.py` (`_parse_response`) to fix the LLM generating "1. Point 2. Point" inline without line breaks. The regex `(?<!^)(?=\b\d+\.\s)` safely identifies the exact start of a numbered list item and injects `\n\n` immediately before it, without risking splitting mid-sentence hyphenations or emphasis asterisks like the previous Phase 19 regex did. Code pushed to `main`.
 
 ## Next Steps
 - Await Hackathon Demo / user validation
