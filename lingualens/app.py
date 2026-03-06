@@ -49,22 +49,21 @@ st.markdown("""
        Text:       Dark Gray   #1F2937
     ───────────────────────────────────────────────── */
 
-    /* Hide Streamlit Default UI but keep sidebar toggle */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    [data-testid="stToolbar"] {visibility: hidden; display: none;}
-    [data-testid="stDecoration"] {visibility: hidden; display: none;}
-    [data-testid="manage-app-button"] {display: none;}
+    /* Hide Streamlit Toolbar and Footer */
+    [data-testid="stToolbar"] {display: none !important;}
+    footer {display: none !important;}
     
-    /* Ensure the sidebar toggle stays visible on top of everything */
-    [data-testid="collapsedControl"] {
-        display: flex !important;
-        visibility: visible !important;
-        z-index: 999999 !important;
-    }
-    
+    /* Ensure Header is transparent but still holds the chevron */
     header[data-testid="stHeader"] {
         background: transparent !important;
+    }
+    
+    /* Make sure the sidebar toggles are visible and have correct z-index */
+    [data-testid="stSidebarCollapsedControl"], [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        z-index: 1000000 !important;
+        color: #FFFFFF !important;
     }
 
     /* Global font */
