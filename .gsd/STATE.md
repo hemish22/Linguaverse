@@ -1,10 +1,10 @@
 ## Current Position
-- **Phase**: 21 (Numbered List Strict Parsing)
+- **Phase**: 22 (LLM Prompt Formatting & Readability Overhaul)
 - **Task**: All tasks complete
 - **Status**: Verified
 
 ## Last Session Summary
-Phase 21 executed successfully. Re-introduced a targeted Python `re.sub` into `llm_module.py` (`_parse_response`) to fix the LLM generating "1. Point 2. Point" inline without line breaks. The regex `(?<!^)(?=\b\d+\.\s)` safely identifies the exact start of a numbered list item and injects `\n\n` immediately before it, without risking splitting mid-sentence hyphenations or emphasis asterisks like the previous Phase 19 regex did. Code pushed to `main`.
+Phase 22 executed perfectly. Instead of attempting to cleanly parse raw paragraphs with post-generation logic, I heavily refactored the original `_build_prompt` instruction in `llm_module.py`. The LLM has now been explicitly instructed to output a highly-scannable, visually-spaced markdown template consisting of `Quick Summary (📄)`, `Key Points (💡)`, `Steps to Complete (📝)`, and `Important Note (⚠️)`. Because this UI is so superior, the split `Key Points` and `Explanation` tabs in `app.py` were retired; the app now renders a single unified markdown block containing exactly what the user needs. Output committed to Git.
 
 ## Next Steps
-- Await Hackathon Demo / user validation
+- Finalize application deployment testing.

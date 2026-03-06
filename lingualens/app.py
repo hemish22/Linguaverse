@@ -492,50 +492,32 @@ if st.session_state.get("analysis_result"):
     """, unsafe_allow_html=True)
     st.code(extracted_text, language=None)
 
-    # Dynamic single-column layout based on target language
-    # Toggleable Tabs for Key Points and Detailed Explanation
+    # Dynamic single-column layout
+    st.markdown('<div class="result-card">', unsafe_allow_html=True)
     if target_language == "English":
-        key_tab, exp_tab = st.tabs(["🎯 Key Points", "📖 Detailed Explanation"])
-        with key_tab:
-            if result.get("key_points"):
-                st.markdown(f'<div class="small-text">{result["key_points"]}</div>', unsafe_allow_html=True)
-            else:
-                st.info("No key points generated.")
-        with exp_tab:
-            st.markdown(f'<div class="small-text">{result["explanation"]}</div>', unsafe_allow_html=True)
+        content_to_show = result.get("explanation", "")
+        st.markdown(f'<div class="small-text">{content_to_show}</div>', unsafe_allow_html=True)
     else:
-        # If translated, ONLY show the translated tabs to prevent clutter
-        trans_key_tab, trans_exp_tab = st.tabs([f"🎯 Translated Key Points ({target_language})", f"📖 Translated Explanation ({target_language})"])
-        with trans_key_tab:
-            if result.get("translated_key_points"):
-                st.markdown(f'<div class="small-text">{result["translated_key_points"]}</div>', unsafe_allow_html=True)
-            else:
-                st.info("No translated key points generated.")
-        with trans_exp_tab:
-            st.markdown(f'<div class="small-text">{result["translation"]}</div>', unsafe_allow_html=True)
+        content_to_show = result.get("translation", "")
+        # If no translation is generated yet (fallback), use explanation
+        if not content_to_show:
+            content_to_show = result.get("explanation", "")
+        st.markdown(f'<div class="small-text">{content_to_show}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Text-to-Speech
     st.markdown("### 🔊 Listen")
-
-    tts_text_short = result.get("translated_key_points") if target_language != "English" else result.get("key_points", "")
-    tts_text_long = result.get("translation") if target_language != "English" else result.get("explanation", "")
-
-    if tts_text_short:
-        try:
-            st.write("**▶️ Key Points Audio (Fast)**")
-            audio_bytes_short = text_to_speech(tts_text_short, target_language)
-            st.audio(audio_bytes_short, format="audio/mp3")
-        except Exception as e:
-            st.warning(f"Key Points TTS unavailable: {str(e)}")
-
-    if tts_text_long:
-        with st.spinner("Generating Detailed Explanation Audio..."):
+    
+    if content_to_show:
+        with st.spinner("Generating Audio Summary..."):
             try:
-                st.write("**▶️ Detailed Explanation Audio**")
-                audio_bytes_long = text_to_speech(tts_text_long, target_language)
-                st.audio(audio_bytes_long, format="audio/mp3")
+                st.write("**▶️ Audio Explanation**")
+                # Remove markdown tokens that might sound weird in TTS
+                tts_clean_text = content_to_show.replace("*", "").replace("#", "").replace("📄", "").replace("💡", "").replace("📝", "").replace("⚠️", "")
+                audio_bytes = text_to_speech(tts_clean_text, target_language)
+                st.audio(audio_bytes, format="audio/mp3")
             except Exception as e:
-                st.warning(f"Detailed Explanation TTS unavailable: {str(e)}")
+                st.warning(f"Audio TTS unavailable: {str(e)}")
 
     # ─── Document Q&A Section ────────────────────────────────────────
 

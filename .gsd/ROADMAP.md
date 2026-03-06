@@ -1,3 +1,6 @@
+### Phase 22: LLM Prompt Formatting & Readability Overhaul
+**Status**: ✅ Complete
+
 ### Phase 21: Numbered List Strict Parsing
 **Status**: ✅ Complete
 
@@ -83,6 +86,18 @@
 
 **Tasks**:
 - [ ] TBD (run /plan 21 to create)
+
+**Verification**:
+- TBD
+---
+
+### Phase 22: LLM Prompt Formatting & Readability Overhaul
+**Status**: ⬜ Not Started
+**Objective**: Redesign the LLM prompt to output highly structured, scannable text with icons, dedicated sections (Summary, Key Points, Steps, Notes), and shorter sentences to drastically improve readability.
+**Depends on**: Phase 21
+
+**Tasks**:
+- [ ] TBD (run /plan 22 to create)
 
 **Verification**:
 - TBD

@@ -48,33 +48,47 @@ government document, signboard, instruction manual, research paper, or similar).
 
 Your task:
 1. **Detected Language**: Identify the primary language(s) of the original text.
-2. **Key Points**: List 3-5 short, single-liner, actionable takeaways. If this is a form or document, state exactly what must be done and what is important. Do NOT use paragraphs.
-3. **Translated Key Points**: Translate these short key points into {target_language}.
-4. **Detailed Explanation**: Rewrite the text tailored for a {difficulty}. Avoid jargon and technical terms. If the text contains medical, legal, or technical content, explain what it means in practical terms for a {difficulty}.
-5. **Translated Explanation**: Translate your detailed explanation into {target_language}. Make sure the translation is natural and easy to read.
+2. **Original Explanation**: Restructure and simplify the text tailord for a {difficulty}.
+   - Use simple, short sentences.
+   - Highlight important keywords using **bold text**.
+   - Output EXACTLY the 4 sections requested below (Quick Summary, Key Points, Steps to Complete, Important Note).
+   - If a section doesn't apply (e.g. no steps to complete), just leave it blank or omit it smoothly.
+3. **Translated Explanation**: Translate the entire restructured explanation into {target_language}. Maintain the same sections, icons, short sentences, and bold keywords.
 
 Format your response EXACTLY like this (use these exact headers):
 
 ## Detected Language
 [Language name]
 
-## Key Points
+## Original Explanation
+📄 **Quick Summary**
+---
+[2 simple, short sentences]
 
-1. [Single-liner actionable point 1]
-2. [Single-liner actionable point 2]
-3. [Single-liner actionable point 3]
+💡 **Key Points**
+---
+* **[Keyword]** - [Short explanation]
+* **[Keyword]** - [Short explanation]
 
-## Translated Key Points ({target_language})
+📝 **Steps to Complete**
+---
+1. [Step 1]
+2. [Step 2]
 
-1. [Translated point 1]
-2. [Translated point 2]
-3. [Translated point 3]
-
-## Detailed Explanation
-[Your simple explanation tailored for a {difficulty}]
+⚠️ **Important Note**
+---
+[Critical warning or note]
 
 ## Translated Explanation ({target_language})
-[Your translated explanation here]
+📄 **[Translated 'Quick Summary' title]**
+---
+[Translated summary sentences]
+
+💡 **[Translated 'Key Points' title]**
+---
+* **[Translated Keyword]** - [Translated short explanation]
+
+...and so on for the rest of the sections. Maintain the exact formatting.
 
 ---
 
@@ -143,31 +157,18 @@ def _parse_response(response_text: str, target_language: str) -> dict:
     
     # Use regex to robustly parse sections regardless of spacing
     detected_lang_match = re.search(r'## Detected Language\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
-    key_points_match = re.search(r'## Key Points\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
-    translated_kp_match = re.search(r'## Translated Key Points.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
-    explanation_match = re.search(r'## Detailed Explanation\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
+    explanation_match = re.search(r'## Original Explanation\s*\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
     translation_match = re.search(r'## Translated Explanation.*?\n(.*?)(?=\n##|$)', response_text, re.DOTALL | re.IGNORECASE)
-
-    key_points = key_points_match.group(1).strip() if (key_points_match and key_points_match.group(1)) else ""
-    translated_key_points = translated_kp_match.group(1).strip() if (translated_kp_match and translated_kp_match.group(1)) else ""
-
-    # Extremely specific parsing to force the LLM's inline "1. Point 2. Point" structure onto newlines.
-    # We look behind to ensure we are not at the start of string `(?<!^)`. 
-    # We look ahead for a word boundary, digits, a literal period, and a space `(?=\b\d+\.\s)`
-    key_points = re.sub(r'(?<!^)(?=\b\d+\.\s)', '\n\n', key_points)
-    translated_key_points = re.sub(r'(?<!^)(?=\b\d+\.\s)', '\n\n', translated_key_points)
 
     explanation = explanation_match.group(1).strip() if (explanation_match and explanation_match.group(1)) else ""
     translation = translation_match.group(1).strip() if (translation_match and translation_match.group(1)) else ""
     detected_lang = detected_lang_match.group(1).strip() if (detected_lang_match and detected_lang_match.group(1)) else "Unknown"
 
-    if not explanation and not key_points and not translation:
+    if not explanation and not translation:
         explanation = str(response_text).strip() if response_text else ""
         
     return {
         "detected_language": detected_lang,
-        "key_points": key_points,
-        "translated_key_points": translated_key_points,
         "explanation": explanation,
         "translation": translation,
     }
