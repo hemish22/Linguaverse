@@ -7,7 +7,6 @@ services:
   - type: web
     name: lingualens-api
     runtime: docker
-    rootDir: lingualens
     plan: free
     healthCheckPath: /api/health
     envVars:

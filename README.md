@@ -20,7 +20,8 @@ Upload an image containing complex text (medicine labels, government documents, 
 ### 1. Clone and navigate
 
 ```bash
-cd lingualens
+git clone https://github.com/hemish22/Linguaverse.git
+cd Linguaverse
 ```
 
 ### 2. Install dependencies
@@ -64,11 +65,11 @@ cd frontend && npm install && npm run dev
 ## 📁 Project Structure
 
 ```
-lingualens/
+Linguaverse/
 ├── api.py               # FastAPI backend (wraps ocr/llm/utils)
 ├── frontend/            # React + Vite + TypeScript + Tailwind + shadcn/ui
 ├── app.py               # Legacy Streamlit UI (alternate)
-├── ocr_module.py        # EasyOCR text extraction
+├── ocr_module.py        # Tesseract OCR text extraction
 ├── llm_module.py        # Groq API simplification & translation
 ├── utils.py             # Shared utilities (config, TTS, image processing)
 ├── requirements.txt     # Python dependencies

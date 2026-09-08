@@ -33,9 +33,9 @@ URL, and the backend's CORS allow-list needs the frontend domain.
 Prereq: a [Render account](https://render.com).
 
 1. Render dashboard → **New** → **Blueprint**.
-2. Connect the **Linguaverse GitHub repo** (the `lingualens` repo).
+2. Connect the **`hemish22/Linguaverse` GitHub repo**.
 3. Render reads `render.yaml` and creates the **lingualens-api** web service
-   (Docker runtime, root dir `lingualens`, plan `free`).
+   (Docker runtime, repo root, plan `free`).
 4. In the service → **Environment** tab, set **GROQ_API_KEY** to your real Groq
    key (`sync: false` in the blueprint means you enter it as a secret; it's
    never written to the repo). You can set **ALLOWED_ORIGINS** here too or in
@@ -58,7 +58,7 @@ vercel                  # first deploy (interactive)
 
 Settings (configure in the dashboard after import):
 
-- **Root directory:** `lingualens/frontend`
+- **Root directory:** `frontend`
 - **Framework preset:** Vite
 - **Build command:** `npm run build`
 - **Output directory:** `dist`
