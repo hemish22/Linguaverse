@@ -1,0 +1,23 @@
+# Render Blueprint for the LinguaLens backend (FastAPI via Docker).
+#
+# Plan: use `standard` for the web service — the free 512MB plan is usually too
+# small because loading PyTorch + EasyOCR needs ~1GB+ RAM.
+
+services:
+  - type: web
+    name: lingualens-api
+    runtime: docker
+    rootDir: lingualens
+    plan: standard
+    healthCheckPath: /api/health
+    envVars:
+      # Optional/flagged for secret input: your GROQ API key.
+      # Put the real value in the dashboard (not this file) so it stays secret.
+      - key: GROQ_API_KEY
+        sync: false
+      # Comma-separated list of allowed CORS origins.
+      # Set this in the dashboard to your Vercel frontend URL, e.g.
+      #   https://lingualens.vercel.app
+      # (added after the frontend is deployed; envs can be updated any time).
+      - key: ALLOWED_ORIGINS
+        sync: false

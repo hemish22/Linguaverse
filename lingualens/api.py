@@ -3,9 +3,13 @@ api.py — FastAPI backend for LinguaLens.
 
 Exposes the existing LinguaLens python logic over HTTP for the React frontend.
 Reuses ocr_module, llm_module, and utils without modifying them.
+
+In production, set ALLOWED_ORIGINS (comma-separated) to the frontend origin
+(e.g. the Vercel URL) to control CORS; it defaults to local dev origins.
 """
 
 import io
+import os
 
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,13 +29,17 @@ from utils import text_to_speech
 
 app = FastAPI(title="LinguaLens API")
 
-# Allow the Vite dev origins (and React defaults). Open in dev.
+# Allow the Vite dev origins (and React defaults) by default;
+# overridable in prod via ALLOWED_ORIGINS (comma-separated).
+DEFAULT_ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:3000"
+_allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", DEFAULT_ALLOWED_ORIGINS).split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
