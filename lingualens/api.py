@@ -37,10 +37,14 @@ _allowed_origins = [
     for origin in os.getenv("ALLOWED_ORIGINS", DEFAULT_ALLOWED_ORIGINS).split(",")
     if origin.strip()
 ]
+# Wildcard support: ALLOWED_ORIGINS="*" allows any origin. The CORS spec forbids
+# credentials with a wildcard origin, and this API uses no cookies/auth, so we
+# disable credentials whenever the wildcard is in effect.
+_wildcard = "*" in _allowed_origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins,
-    allow_credentials=True,
+    allow_credentials=not _wildcard,
     allow_methods=["*"],
     allow_headers=["*"],
 )
