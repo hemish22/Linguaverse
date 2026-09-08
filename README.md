@@ -58,8 +58,6 @@ Or start them separately:
 cd frontend && npm install && npm run dev
 ```
 
-> **Legacy UI:** the original Streamlit app (`app.py`) still runs at `http://localhost:8501` via `streamlit run app.py` and is kept as a legacy/alternate interface while the React frontend supersedes it.
-
 ---
 
 ## 📁 Project Structure
@@ -68,8 +66,8 @@ cd frontend && npm install && npm run dev
 Linguaverse/
 ├── api.py               # FastAPI backend (wraps ocr/llm/utils)
 ├── frontend/            # React + Vite + TypeScript + Tailwind + shadcn/ui
-├── app.py               # Legacy Streamlit UI (alternate)
 ├── ocr_module.py        # Tesseract OCR text extraction
+├── pdf_extract.py       # PDF text-layer + scanned-page OCR
 ├── llm_module.py        # Groq API simplification & translation
 ├── utils.py             # Shared utilities (config, TTS, image processing)
 ├── requirements.txt     # Python dependencies
@@ -94,14 +92,14 @@ Linguaverse/
         └──────────┬──────────────┬──────────────┬────┘
                    ▼              ▼              ▼
         ┌──────────────┐  ┌──────────────────┐  ┌───────────┐
-        │  EasyOCR      │  │  Groq            │  │  gTTS     │
+        │  Tesseract    │  │  Groq            │  │  gTTS     │
         │  extract_text │  │  openai/gpt-oss- │  │  TTS      │
-        │  (en+hi/en+ta)│  │  120b · whisper- │  └───────────┘
+        │ (eng+hin/tam) │  │  120b · whisper- │  └───────────┘
         └──────────────┘  │  large-v3         │
                           └──────────────────┘
 ```
 
-The React frontend calls the FastAPI backend, which reuses the existing `ocr_module.py` / `llm_module.py` / `utils.py` modules. CORS is open to the Vite dev origin. The legacy `app.py` Streamlit UI is kept as an alternate interface.
+The React frontend calls the FastAPI backend, which reuses the `ocr_module.py` / `llm_module.py` / `pdf_extract.py` / `utils.py` modules. CORS origins are controlled by `ALLOWED_ORIGINS`.
 
 ## API endpoints
 

@@ -8,12 +8,6 @@ URL, and the backend's CORS allow-list needs the frontend domain.
 > **Cold start caveat (free tier):** Render free services spin down after
 > ~15 min idle and take ~50s to spin back up on the next request. Expect a slow
 > first hit after inactivity.
->
-> **Alternate host (not used):** `README_HF.md` keeps the Hugging Face Spaces
-> config (Docker SDK, frontmatter) from an earlier iteration. With Tesseract the
-> app is much lighter, so Render free works; HF Spaces free is also fine if you
-> ever prefer it — just note HF Spaces **Pro** is required for spaces of this
-> size, so Render free is the primary target.
 
 ---
 
