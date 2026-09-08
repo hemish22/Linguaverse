@@ -16,7 +16,8 @@ import numpy as np
 # Import project modules
 from ocr_module import extract_text
 from llm_module import simplify_and_translate, answer_question, generate_suggested_questions
-from utils import text_to_speech, LANGUAGE_MAP
+from html import escape
+from utils import text_to_speech, clean_for_tts, LANGUAGE_MAP
 
 
 # ─── Page Configuration ──────────────────────────────────────────────
@@ -299,20 +300,6 @@ st.markdown("""
         background: rgba(255, 68, 0, 0.05) !important;
     }
     
-    /* Inject the hero text at the top of the dropzone */
-    [data-testid="stFileUploaderDropzone"]::before {
-        content: 'Provide an image or text to get started\\A\\A Upload an image, take a photo, or directly paste text you want explained';
-        white-space: pre-wrap;
-        display: block;
-        text-align: center;
-        color: #9CA3AF;
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-        font-weight: 500;
-        line-height: 1.6;
-        width: 100%;
-    }
-
     /* Force the inner section (icon + text + button) into a row */
     [data-testid="stFileUploaderDropzone"] section {
         display: flex !important;
@@ -326,6 +313,15 @@ st.markdown("""
     /* Hide native streamlit file uploader helper text like the 200MB limit */
     [data-testid="stFileUploaderDropzone"] small {
         display: none !important; 
+    }
+
+    /* Accesible dropzone hint text - raised contrast for WCAG AA */
+    .dropzone-hint {
+        color: #4B5563;
+        font-size: 1.25rem;
+        font-weight: 500;
+        line-height: 1.6;
+        text-align: center;
     }
 
 </style>
@@ -422,10 +418,15 @@ input_image = None
 direct_text_input = ""
 
 with tab_upload:
+    st.markdown(
+        '<p class="dropzone-hint">Provide an image or text to get started.<br>'
+        "Upload an image, take a photo, or directly paste text you want explained.</p>",
+        unsafe_allow_html=True,
+    )
     uploaded_file = st.file_uploader(
-        "Choose an image...", 
+        "Choose an image or document to explain",
         type=["jpg", "jpeg", "png", "webp"],
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
     
     if uploaded_file is not None:
@@ -518,6 +519,11 @@ if input_image is not None or direct_text_input:
                 st.session_state.suggested_questions = suggested
                 st.session_state.analysis_language = target_language
 
+                # New analysis → drop any cached TTS audio from the previous document
+                for key in list(st.session_state.keys()):
+                    if key.startswith("tts_"):
+                        del st.session_state[key]
+
                 status.update(
                     label="Analysis complete!",
                     state="complete",
@@ -553,28 +559,34 @@ if st.session_state.get("analysis_result"):
     st.markdown('<div class="result-card">', unsafe_allow_html=True)
     if target_language == "English":
         content_to_show = result.get("explanation", "")
-        st.markdown(f'<div class="small-text">{content_to_show}</div>', unsafe_allow_html=True)
     else:
         content_to_show = result.get("translation", "")
         # If no translation is generated yet (fallback), use explanation
         if not content_to_show:
             content_to_show = result.get("explanation", "")
-        st.markdown(f'<div class="small-text">{content_to_show}</div>', unsafe_allow_html=True)
+    # Escape LLM output to prevent injected HTML/scripts from executing
+    # (XSS hardening). Any intended formatting will appear as literal text.
+    st.markdown(f'<div class="small-text">{escape(content_to_show)}</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Text-to-Speech
-    st.markdown("###Listen")
-    
+    st.markdown("### Listen")
+
     if content_to_show:
-        with st.spinner("Generating Audio Summary..."):
-            try:
-                st.write("**▶Audio Explanation**")
-                # Remove markdown tokens that might sound weird in TTS
-                tts_clean_text = content_to_show.replace("*", "").replace("#", "").replace("📄", "").replace("💡", "").replace("📝", "").replace("⚠️", "")
-                audio_bytes = text_to_speech(tts_clean_text, target_language)
-                st.audio(audio_bytes, format="audio/mp3")
-            except Exception as e:
-                st.warning(f"Audio TTS unavailable: {str(e)}")
+        # Cache the synthesized audio so it is generated once per analysis,
+        # not regenerated on every Streamlit rerun. Cleared on new analysis.
+        audio_cache_key = f"tts_analysis_{target_language}"
+        if audio_cache_key not in st.session_state:
+            with st.spinner("Generating Audio Summary..."):
+                try:
+                    st.write("**▶Audio Explanation**")
+                    audio_bytes = text_to_speech(clean_for_tts(content_to_show), target_language)
+                    st.session_state[audio_cache_key] = audio_bytes
+                except Exception as e:
+                    st.warning(f"Audio TTS unavailable: {str(e)}")
+                    st.session_state[audio_cache_key] = None
+        if st.session_state.get(audio_cache_key):
+            st.audio(st.session_state[audio_cache_key], format="audio/mp3")
 
     # ─── Document Q&A Section ────────────────────────────────────────
 
@@ -601,7 +613,6 @@ if st.session_state.get("analysis_result"):
                         )
                     st.session_state.chat_history.append({"role": "user", "content": sq})
                     st.session_state.chat_history.append({"role": "assistant", "content": sq_answer})
-                    st.rerun()
 
     # Text question input (form allows Enter to submit + auto-clear)
     with st.form("qa_form", clear_on_submit=True):
@@ -621,7 +632,6 @@ if st.session_state.get("analysis_result"):
             )
         st.session_state.chat_history.append({"role": "user", "content": user_question})
         st.session_state.chat_history.append({"role": "assistant", "content": text_answer})
-        st.rerun()
 
     # Voice question input
     st.markdown(
@@ -649,7 +659,6 @@ if st.session_state.get("analysis_result"):
             )
         st.session_state.chat_history.append({"role": "user", "content": "🎤 Voice question"})
         st.session_state.chat_history.append({"role": "assistant", "content": voice_answer})
-        st.rerun()
 
     # Display conversation history
     if st.session_state.get("chat_history"):
@@ -658,11 +667,19 @@ if st.session_state.get("analysis_result"):
             with st.chat_message("user" if msg["role"] == "user" else "assistant"):
                 st.markdown(msg["content"])
                 if msg["role"] == "assistant":
-                    try:
-                        ans_audio = text_to_speech(msg["content"], target_language)
-                        st.audio(ans_audio, format="audio/mp3")
-                    except Exception:
-                        pass
+                    # Generate the audio once and cache it; give the user a
+                    # play toggle instead of auto-loading/auto-playing audio.
+                    ans_audio_key = f"ans_tts_{idx}_{target_language}"
+                    if ans_audio_key not in st.session_state:
+                        try:
+                            ans_audio = text_to_speech(clean_for_tts(msg["content"]), target_language)
+                            st.session_state[ans_audio_key] = ans_audio
+                        except Exception:
+                            st.session_state[ans_audio_key] = None
+                    cached_audio = st.session_state.get(ans_audio_key)
+                    if cached_audio:
+                        with st.expander("▶ Listen", expanded=False):
+                            st.audio(cached_audio, format="audio/mp3")
 
 
 

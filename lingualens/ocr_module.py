@@ -5,6 +5,7 @@ Uses EasyOCR to extract text from images. The reader is lazily initialized
 to avoid loading heavy models on every call.
 """
 
+import sys
 import easyocr
 import numpy as np
 from PIL import Image
@@ -18,19 +19,25 @@ _readers = {}
 def _get_reader(lang_code="hi"):
     """
     Lazily initialize and return the EasyOCR reader.
-    Supports English, Hindi, and Tamil text detection.
+    Supports English-only, Hindi, and Tamil text detection.
     Maintains separate readers for mutually-exclusive language models (like Hindi vs Tamil).
     """
     global _readers
     
-    # EasyOCR doesn't allow combining Tamil ('ta') with Hindi ('hi'). They must run in separate readers.
     if lang_code not in _readers:
-        lang_list = ["en", "ta"] if lang_code == "ta" else ["en", "hi"]
-        
-        # gpu=True will use GPU if available, falls back to CPU otherwise
+        if lang_code == "en":
+            lang_list = ["en"]
+        elif lang_code == "ta":
+            # EasyOCR doesn't allow combining Tamil ('ta') with Hindi ('hi'). They must run in separate readers.
+            lang_list = ["en", "ta"]
+        else:
+            lang_list = ["en", "hi"]
+
+        # Auto-detect GPU: macOS has no CUDA-backed PyTorch, so force CPU there.
+        gpu = sys.platform != "darwin"
         _readers[lang_code] = easyocr.Reader(
             lang_list,
-            gpu=True
+            gpu=gpu
         )
         
     return _readers[lang_code]
@@ -61,8 +68,16 @@ def extract_text(image, source_language_preset="English & Hindi") -> tuple[str, 
     else:
         raise TypeError(f"Unsupported image type: {type(image)}")
 
-    # Determine the primary language code from the UI preset
-    lang_code = "ta" if "Tamil" in source_language_preset else "hi"
+    # Determine the language code from the UI preset.
+    # "English & X" presets load English plus the detected script; a pure
+    # "English" preset now loads the lightweight English-only reader.
+    preset = source_language_preset
+    if "Tamil" in preset and "Hindi" not in preset:
+        lang_code = "ta"
+    elif "Hindi" in preset:
+        lang_code = "hi"
+    else:
+        lang_code = "en"
 
     reader = _get_reader(lang_code)
 
@@ -72,8 +87,11 @@ def extract_text(image, source_language_preset="English & Hindi") -> tuple[str, 
     if not results:
         return "", 0.0
 
-    # Extract text and calculate average confidence
-    valid_results = [(text, conf) for (_, text, conf) in results if conf > 0.2]
+    # Extract text. Use a tiny floor (0.05) that only drops near-garbage
+    # glyphs; anything above it is surfaced rather than silently thrown away,
+    # so low-confidence text still reaches the user. The returned average
+    # confidence honestly reflects the quality of what was extracted.
+    valid_results = [(text, conf) for (_, text, conf) in results if conf > 0.05]
     
     if not valid_results:
         return "", 0.0

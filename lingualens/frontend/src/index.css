@@ -1,0 +1,177 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: "Geist Variable", sans-serif;
+
+  /* Brand palette — LinguaLens (modernized from original Navy/Red/Orange/Yellow) */
+  --color-ink: #0f1c30;
+  --color-ink-soft: #243b5c;
+  --color-navy: #12335f;
+  --color-royal: #1e3a8a;
+  --color-vermilion: #e64a2e;
+  --color-ember: #f2601c;
+  --color-amber: #f5a623;
+  --color-gold: #ffd166;
+  --color-paper: #f6f4ef;
+  --color-paper-deep: #ece7dd;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ── Light: "Paper & Ink" ─────────────────────────────────────────── */
+:root {
+  --radius: 0.8rem;
+
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+
+  --card: #fdfcfa;
+  --card-foreground: var(--color-ink);
+
+  --popover: #fdfcfa;
+  --popover-foreground: var(--color-ink);
+
+  --primary: var(--color-vermilion);
+  --primary-foreground: #fff8f2;
+
+  --secondary: var(--color-paper-deep);
+  --secondary-foreground: var(--color-ink);
+
+  --muted: #eee9df;
+  --muted-foreground: #5b6675;
+
+  --accent: var(--color-amber);
+  --accent-foreground: #3b2a05;
+
+  --destructive: #c33b2e;
+  --border: #e2dccf;
+  --input: #d8d2c4;
+  --ring: var(--color-vermilion);
+
+  --chart-1: var(--color-royal);
+  --chart-2: var(--color-vermilion);
+  --chart-3: var(--color-amber);
+  --chart-4: var(--color-navy);
+  --chart-5: var(--color-gold);
+
+  --sidebar: #f1eee6;
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-royal);
+  --sidebar-primary-foreground: #f4f7fc;
+  --sidebar-accent: #e6e1d4;
+  --sidebar-accent-foreground: var(--color-ink);
+  --sidebar-border: #dcd6c8;
+  --sidebar-ring: var(--color-vermilion);
+}
+
+/* ── Dark: "Midnight Lens" ────────────────────────────────────────── */
+.dark {
+  --background: var(--color-ink);
+  --foreground: #e9edf4;
+
+  --card: #16243c;
+  --card-foreground: #e9edf4;
+
+  --popover: #16243c;
+  --popover-foreground: #e9edf4;
+
+  --primary: var(--color-ember);
+  --primary-foreground: #fff6ee;
+
+  --secondary: #1d3050;
+  --secondary-foreground: #e9edf4;
+
+  --muted: #1d3050;
+  --muted-foreground: #97a5bb;
+
+  --accent: var(--color-amber);
+  --accent-foreground: #2a1f05;
+
+  --destructive: #f2695a;
+  --border: #2a3e60;
+  --input: #30476c;
+  --ring: var(--color-ember);
+
+  --chart-1: var(--color-gold);
+  --chart-2: var(--color-ember);
+  --chart-3: var(--color-amber);
+  --chart-4: #5e9bd0;
+  --chart-5: var(--color-royal);
+
+  --sidebar: #122036;
+  --sidebar-foreground: #e9edf4;
+  --sidebar-primary: var(--color-royal);
+  --sidebar-primary-foreground: #f4f7fc;
+  --sidebar-accent: #1d3050;
+  --sidebar-accent-foreground: #e9edf4;
+  --sidebar-border: #2a3e60;
+  --sidebar-ring: var(--color-ember);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Distinctive "lens aperture" motif + paper texture */
+.lens-motif {
+  background:
+    radial-gradient(circle at 50% 42%, transparent 0 18%, rgba(230, 74, 46, 0.14) 18% 19%, transparent 19% 27%, rgba(35, 51, 95, 0.12) 27% 28%, transparent 28% 36%) center / 46px 46px;
+}
+.paper-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='40' height='40' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: rgba(230, 74, 46, 0.25);
+}

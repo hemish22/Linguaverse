@@ -1,32 +1,42 @@
 """
 llm_module.py — LLM interaction for LinguaLens
 
-Uses Google Gemini (gemini-2.5-flash) to:
+Uses a Groq-hosted text model (openai/gpt-oss-120b) to:
 - Simplify complex text into plain language
 - Generate key points
 - Translate explanations into the target language
+Audio questions are transcribed with Groq's Whisper model first,
+because Groq's chat models are text-only (not multimodal).
 """
 
-import google.generativeai as genai
+import os
+from groq import Groq
 from utils import load_config
 
 
-# Configure the Gemini API on module load
-_api_key = None
-_model = None
+# The Groq chat model used for all completions.
+# NOTE: gpt-oss-120b is a reasoning model — its response carries a `reasoning`
+# field AND a `content` field. Read ONLY `message.content`, and never set a
+# small max_tokens (reasoning tokens are spent first, so a low cap yields
+# empty content). Overridable via the GROQ_MODEL env var.
+_MODEL_NAME = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+
+# Whisper model used to transcribe audio questions.
+_AUDIO_MODEL = "whisper-large-v3"
+
+# Configure the Groq API on module load
+_client = None
 
 
-def _get_model():
+def _get_client():
     """
-    Lazily initialize and return the Gemini model.
+    Lazily initialize and return the Groq client.
     Configures the API key on first call.
     """
-    global _api_key, _model
-    if _model is None:
-        _api_key = load_config()
-        genai.configure(api_key=_api_key)
-        _model = genai.GenerativeModel("gemini-2.5-flash")
-    return _model
+    global _client
+    if _client is None:
+        _client = Groq(api_key=load_config())
+    return _client
 
 
 def _build_prompt(text: str, target_language: str, difficulty: str) -> str:
@@ -48,7 +58,7 @@ government document, signboard, instruction manual, research paper, or similar).
 
 Your task:
 1. **Detected Language**: Identify the primary language(s) of the original text.
-2. **Original Explanation**: Restructure and simplify the text tailord for a {difficulty}.
+2. **Original Explanation**: Restructure and simplify the text tailored for a {difficulty}.
    - Use simple, short sentences.
    - Highlight important keywords using **bold text**.
    - Output EXACTLY the 4 sections requested below (Quick Summary, Key Points, Steps to Complete, Important Note).
@@ -102,7 +112,7 @@ Text to analyze:
 
 def simplify_and_translate(text: str, target_language: str = "Hindi", difficulty: str = "Student") -> dict:
     """
-    Send extracted text to Gemini for simplification and translation.
+    Send extracted text to the LLM for simplification and translation.
 
     Args:
         text: The OCR-extracted text to process.
@@ -128,12 +138,15 @@ def simplify_and_translate(text: str, target_language: str = "Hindi", difficulty
             "full_response": "",
         }
 
-    model = _get_model()
+    client = _get_client()
     prompt = _build_prompt(text, target_language, difficulty)
 
     try:
-        response = model.generate_content(prompt)
-        full_text = response.text
+        response = client.chat.completions.create(
+            model=_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        full_text = response.choices[0].message.content or ""
 
         # Parse the structured response into sections
         result = _parse_response(full_text, target_language)
@@ -141,7 +154,7 @@ def simplify_and_translate(text: str, target_language: str = "Hindi", difficulty
         return result
 
     except Exception as e:
-        error_msg = f"Error communicating with Gemini API: {str(e)}"
+        error_msg = "Sorry, we couldn't reach the AI assistant. Please check your internet connection and API key, then try again."
         return {
             "detected_language": "Unknown",
             "key_points": "",
@@ -166,12 +179,32 @@ def _parse_response(response_text: str, target_language: str) -> dict:
 
     if not explanation and not translation:
         explanation = str(response_text).strip() if response_text else ""
-        
+
+    key_points = _extract_key_points(explanation)
+    translated_key_points = _extract_key_points(translation)
+
     return {
         "detected_language": detected_lang,
+        "key_points": key_points,
+        "translated_key_points": translated_key_points,
         "explanation": explanation,
         "translation": translation,
     }
+
+
+def _extract_key_points(section_text: str) -> str:
+    """
+    Extract the 'Key Points' bullet list from inside a section (explanation or
+    translation). Returns the raw bullet lines, or an empty string if none found.
+    """
+    import re
+    if not section_text:
+        return ""
+
+    match = re.search(r'💡\s*\*?\*?\s*Key Points\s*\*?\*?\s*---?\s*\n(.*?)(?=\n📝|\n⚠️|\n##|$)', section_text, re.DOTALL | re.IGNORECASE)
+    if match and match.group(1):
+        return match.group(1).strip()
+    return ""
 
 
 def generate_suggested_questions(document_text: str, target_language: str = "English") -> list:
@@ -188,7 +221,7 @@ def generate_suggested_questions(document_text: str, target_language: str = "Eng
     if not document_text or not document_text.strip():
         return []
 
-    model = _get_model()
+    client = _get_client()
     prompt = f"""Based on the following document text, generate exactly 3 short, practical questions
 that a user might want to ask about this document.
 
@@ -202,8 +235,12 @@ No numbering, no bullets, no extra text.
 Keep each question under 12 words."""
 
     try:
-        response = model.generate_content(prompt)
-        questions = [q.strip() for q in response.text.strip().split("\n") if q.strip()]
+        response = client.chat.completions.create(
+            model=_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = response.choices[0].message.content or ""
+        questions = [q.strip() for q in text.strip().split("\n") if q.strip()]
         return questions[:3]
     except Exception:
         return []
@@ -211,17 +248,34 @@ Keep each question under 12 words."""
 
 def answer_question(document_text: str, target_language: str, question_text: str = None, audio_bytes: bytes = None) -> str:
     """
-    Answers a user's question about the document text using Gemini.
-    Supports either text or audio input.
+    Answers a user's question about the document text.
+
+    Accepts either typed text or an audio clip. Because Groq's chat models are
+    text-only, an audio question is transcribed with Whisper first, then the
+    transcribed text is answered. The document text is never sent to Whisper.
     """
-    if not document_text.strip():
+    if not document_text or not document_text.strip():
         return "Please upload a document first."
-        
+
     if not question_text and not audio_bytes:
         return "Please provide a question."
 
-    model = _get_model()
-    
+    client = _get_client()
+
+    # Transcribe audio before asking the chat model (text-only model).
+    if audio_bytes and not question_text:
+        try:
+            transcription = client.audio.transcriptions.create(
+                model=_AUDIO_MODEL,
+                file=("question.wav", audio_bytes),
+            )
+            question_text = transcription.text.strip()
+        except Exception:
+            return "Sorry, I couldn't understand the audio question. Please try speaking again or type your question."
+
+    if not question_text:
+        return "Please provide a question."
+
     prompt = f"""You are an incredibly helpful assistant helping users understand documents.
 
 Document text:
@@ -230,7 +284,7 @@ Document text:
 \"\"\"
 
 User question:
-{question_text if question_text else '(Please listen to the attached audio question)'}
+{question_text}
 
 Rules:
 1. Answer using ONLY the information in the document.
@@ -239,15 +293,11 @@ Rules:
 4. IMPORTANT: You must provide your final answer in the following language: {target_language}.
 """
 
-    contents = [prompt]
-    if audio_bytes:
-        contents.append({
-            "mime_type": "audio/wav",
-            "data": audio_bytes
-        })
-        
     try:
-        response = model.generate_content(contents)
-        return response.text.strip()
-    except Exception as e:
-        return f"Error communicating with Gemini API: {str(e)}"
+        response = client.chat.completions.create(
+            model=_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return (response.choices[0].message.content or "").strip()
+    except Exception:
+        return "Sorry, I couldn't process that question right now. Please try again."

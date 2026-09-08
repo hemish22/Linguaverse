@@ -19,14 +19,14 @@ import numpy as np
 def load_config():
     """
     Load environment variables from .env file.
-    Returns the Gemini API key or raises an error if not found.
+    Returns the GROQ API key or raises an error if not found.
     """
     load_dotenv(override=True)
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         raise ValueError(
-            "GEMINI_API_KEY not found. "
-            "Please create a .env file with: GEMINI_API_KEY=your_key_here"
+            "GROQ_API_KEY not found. "
+            "Please create a .env file with: GROQ_API_KEY=your_key_here"
         )
     return api_key
 

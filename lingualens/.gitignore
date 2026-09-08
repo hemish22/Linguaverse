@@ -1,2 +1,17 @@
 # .env files contain secrets — never commit them
 .env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Test / tooling artifacts
+.pytest_cache/
+.coverage
+
+# Node / Vite frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
