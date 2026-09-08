@@ -1,16 +1,15 @@
-# LinguaLens backend — FastAPI (Hugging Face Spaces, Docker SDK)
+# LinguaLens backend — FastAPI (Render, free tier)
 #
-# Note: first boot downloads EasyOCR detection/recognition models (~64MB) and
-# loads PyTorch, which needs ~1GB+ RAM once the app starts — expect a slow
-# cold start. HF Spaces free tier provides 16GB RAM.
-# Storage/image soft limit on HF is 10GB — well within our needs.
+# The backend uses Tesseract (via pytesseract) — no PyTorch/EasyOCR — so the
+# image is light (~few hundred MB) and fits Render's free 512MB RAM plan.
 
 FROM python:3.11-slim
 
-# OS libraries required by EasyOCR / OpenCV
+# Tesseract binary + language packs (English + Hindi + Tamil)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
-    libglib2.0-0 \
+    tesseract-ocr \
+    tesseract-ocr-hin \
+    tesseract-ocr-tam \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -23,7 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api.py .
 COPY ocr_module.py llm_module.py utils.py pdf_extract.py .
 
-# Hugging Face Spaces expects the app on port 7860
-EXPOSE 7860
+EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${PORT:-7860}"]
+# Render injects $PORT (fallback 8000 for local runs)
+CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${PORT:-8000}"]

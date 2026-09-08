@@ -1,62 +1,50 @@
 """
 ocr_module.py — OCR text extraction for LinguaLens
 
-Uses EasyOCR to extract text from images. The reader is lazily initialized
-to avoid loading heavy models on every call.
+Uses Tesseract (via pytesseract) to extract text from images. No PyTorch
+dependency, which keeps the backend small enough for Render's free tier.
 """
 
-import sys
-import easyocr
+import pytesseract
 import numpy as np
 from PIL import Image
 from utils import preprocess_image
 
 
-# Module-level reader instances (lazy-loaded to avoid memory bloat)
-_readers = {}
+# Maps the Streamlit/API preset to a Tesseract language string.
+# Only 'eng' is installed locally; 'hin'/'tam' packs are apt-installed in the
+# Docker image (Dwight). 'eng' is always included as a fallback base.
+_LANG_MAP = {
+    "English & Tamil": "eng+tam",
+    "English & Hindi": "eng+hin",
+    "English": "eng",
+}
 
 
-def _get_reader(lang_code="hi"):
-    """
-    Lazily initialize and return the EasyOCR reader.
-    Supports English-only, Hindi, and Tamil text detection.
-    Maintains separate readers for mutually-exclusive language models (like Hindi vs Tamil).
-    """
-    global _readers
-    
-    if lang_code not in _readers:
-        if lang_code == "en":
-            lang_list = ["en"]
-        elif lang_code == "ta":
-            # EasyOCR doesn't allow combining Tamil ('ta') with Hindi ('hi'). They must run in separate readers.
-            lang_list = ["en", "ta"]
-        else:
-            lang_list = ["en", "hi"]
-
-        # Auto-detect GPU: macOS has no CUDA-backed PyTorch, so force CPU there.
-        gpu = sys.platform != "darwin"
-        _readers[lang_code] = easyocr.Reader(
-            lang_list,
-            gpu=gpu
-        )
-        
-    return _readers[lang_code]
+def _resolve_langs(source_language_preset: str) -> str:
+    preset = (source_language_preset or "").strip()
+    if "Tamil" in preset and "Hindi" not in preset:
+        return _LANG_MAP["English & Tamil"]
+    if "Hindi" in preset:
+        return _LANG_MAP["English & Hindi"]
+    return _LANG_MAP["English"]
 
 
 def extract_text(image, source_language_preset="English & Hindi") -> tuple[str, float]:
     """
-    Extract text and average confidence from an image using EasyOCR.
+    Extract text and average confidence from an image using Tesseract.
 
     Args:
         image: Can be a PIL Image, numpy array, or file path string.
-        source_language_preset: The string from the Streamlit selectbox indicating the expected text.
+        source_language_preset: The string from the UI/API selectbox indicating
+            the expected text ('English & Hindi', 'English & Tamil', or similar).
 
     Returns:
         Tuple containing:
-        - Extracted text as a single string, joined by newlines. Returns empty string if no text is found.
+        - Extracted text as a single string, joined by newlines. Empty string if no text is found.
         - Average confidence score (float between 0 and 1).
     """
-    # Convert input to numpy array if needed
+    # Convert input to a numpy array if needed
     if isinstance(image, str):
         # File path provided
         img_array = np.array(Image.open(image).convert("RGB"))
@@ -68,35 +56,30 @@ def extract_text(image, source_language_preset="English & Hindi") -> tuple[str, 
     else:
         raise TypeError(f"Unsupported image type: {type(image)}")
 
-    # Determine the language code from the UI preset.
-    # "English & X" presets load English plus the detected script; a pure
-    # "English" preset now loads the lightweight English-only reader.
-    preset = source_language_preset
-    if "Tamil" in preset and "Hindi" not in preset:
-        lang_code = "ta"
-    elif "Hindi" in preset:
-        lang_code = "hi"
-    else:
-        lang_code = "en"
+    langs = _resolve_langs(source_language_preset)
 
-    reader = _get_reader(lang_code)
+    # Pull per-word data so we can compute a real average confidence.
+    data = pytesseract.image_to_data(
+        img_array, lang=langs, output_type=pytesseract.Output.DICT
+    )
 
-    # Run OCR — returns list of (bbox, text, confidence) tuples
-    results = reader.readtext(img_array)
+    confidences = [c for c in data.get("conf", []) if isinstance(c, (int, float)) and c >= 0]
+    words = [w for w in data.get("text", []) if w and w.strip()]
 
-    if not results:
+    if not words or not confidences:
         return "", 0.0
 
-    # Extract text. Use a tiny floor (0.05) that only drops near-garbage
-    # glyphs; anything above it is surfaced rather than silently thrown away,
-    # so low-confidence text still reaches the user. The returned average
-    # confidence honestly reflects the quality of what was extracted.
-    valid_results = [(text, conf) for (_, text, conf) in results if conf > 0.05]
-    
-    if not valid_results:
+    # Keep the low-confidence filtering spirit: drop words below ~20%.
+    valid = [
+        (w.strip(), float(c) / 100.0)
+        for w, c in zip(data.get("text", []), data.get("conf", []))
+        if w.strip() and isinstance(c, (int, float)) and c >= 20
+    ]
+
+    if not valid:
         return "", 0.0
-        
-    extracted_lines = [text for text, _ in valid_results]
-    avg_confidence = float(sum(conf for _, conf in valid_results) / len(valid_results))
+
+    extracted_lines = [text for text, _ in valid]
+    avg_confidence = float(sum(conf for _, conf in valid) / len(valid))
 
     return "\n".join(extracted_lines), avg_confidence
